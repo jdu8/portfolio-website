@@ -1,0 +1,541 @@
+x   <!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO Best Practices -->
+    <title>Ishan Yadav | CS Graduate & Data Scientist</title>
+    <meta name="description" content="Portfolio of Ishan Yadav, a Computer Science graduate student at NYU specializing in data science, machine learning, and software engineering.">
+    <meta name="keywords" content="Ishan Yadav, Data Scientist, Machine Learning Engineer, Software Engineer, Portfolio, NYU, Computer Science">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & Babel for JSX -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles for Cyberpunk Theme -->
+    <style>
+        :root {
+            --bg-dark: #0d0c1d;
+            --bg-medium: #1a1a2e;
+            --primary: #e0218a; /* Neon Magenta */
+            --secondary: #0abdc6; /* Electric Blue */
+            --accent: #9333ea; /* Violet */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        /* CRT Scanline Effect */
+        body::after {
+            content: ' ';
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .text-glow {
+            text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+        }
+        .button-glow {
+            box-shadow: 0 0 5px var(--secondary), 0 0 10px var(--secondary), inset 0 0 5px var(--secondary);
+            transition: all 0.3s ease;
+        }
+        .button-glow:hover {
+            box-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), inset 0 0 10px var(--secondary);
+        }
+        .glitch-hover:hover {
+            animation: glitch 0.3s linear;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        /* News Ticker Animation */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background-color: rgba(0,0,0,0.2);
+            padding: 10px 0;
+            border-top: 1px solid var(--secondary);
+            border-bottom: 1px solid var(--secondary);
+        }
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: ticker 30s linear infinite;
+        }
+        .ticker-item {
+            display: inline-block;
+            padding: 0 2rem;
+            color: var(--secondary);
+        }
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- GAME: Skills Breaker (Breakout) ---
+        const SkillsBreaker = ({ skills, onGameEnd }) => {
+            const canvasRef = useRef(null);
+            // ... existing SkillsBreaker game code ...
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let animationFrameId;
+
+                const resizeCanvas = () => {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetWidth * 0.6;
+                };
+                resizeCanvas();
+
+                // Game Objects
+                const paddle = { x: canvas.width / 2 - 50, y: canvas.height - 20, width: 100, height: 10, dx: 0 };
+                const ball = { x: canvas.width / 2, y: canvas.height - 40, radius: 7, dx: 3, dy: -3 };
+                const brickRowCount = 4;
+                const brickColumnCount = 6;
+                const bricks = [];
+                const brickInfo = { width: (canvas.width - 70) / brickColumnCount, height: 20, padding: 10, offsetTop: 30, offsetLeft: 30 };
+                
+                for (let c = 0; c < brickColumnCount; c++) {
+                    bricks[c] = [];
+                    for (let r = 0; r < brickRowCount; r++) {
+                        const skillIndex = (r * brickColumnCount + c) % skills.length;
+                        bricks[c][r] = { x: 0, y: 0, status: 1, text: skills[skillIndex] };
+                    }
+                }
+
+                function drawBricks() {
+                    let bricksBroken = 0;
+                    bricks.forEach((column, c) => {
+                        column.forEach((brick, r) => {
+                            if (brick.status === 1) {
+                                brick.x = c * (brickInfo.width + brickInfo.padding) + brickInfo.offsetLeft;
+                                brick.y = r * (brickInfo.height + brickInfo.padding) + brickInfo.offsetTop;
+                                ctx.beginPath();
+                                ctx.rect(brick.x, brick.y, brickInfo.width, brickInfo.height);
+                                ctx.fillStyle = `hsl(${ (c * 60 + r * 20) % 360}, 70%, 50%)`;
+                                ctx.fill();
+                                ctx.closePath();
+                                ctx.fillStyle = '#000';
+                                ctx.font = '12px Share Tech Mono';
+                                ctx.fillText(brick.text, brick.x + 5, brick.y + 15);
+                            } else {
+                                bricksBroken++;
+                            }
+                        });
+                    });
+                    if (bricksBroken === brickRowCount * brickColumnCount) {
+                        onGameEnd(true); // Win
+                    }
+                }
+
+                function drawBall() {
+                    ctx.beginPath();
+                    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#e0218a';
+                    ctx.fill();
+                    ctx.closePath();
+                }
+                
+                function drawPaddle() {
+                    ctx.beginPath();
+                    ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+                    ctx.fillStyle = '#0abdc6';
+                    ctx.fill();
+                    ctx.closePath();
+                }
+
+                function collisionDetection() {
+                    bricks.forEach(column => {
+                        column.forEach(brick => {
+                            if (brick.status === 1) {
+                                if (ball.x > brick.x && ball.x < brick.x + brickInfo.width && ball.y > brick.y && ball.y < brick.y + brickInfo.height) {
+                                    ball.dy = -ball.dy;
+                                    brick.status = 0;
+                                }
+                            }
+                        });
+                    });
+                }
+
+                function movePaddle() {
+                    paddle.x += paddle.dx;
+                    if (paddle.x < 0) paddle.x = 0;
+                    if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+                }
+
+                function moveBall() {
+                    ball.x += ball.dx;
+                    ball.y += ball.dy;
+                    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) ball.dx = -ball.dx;
+                    if (ball.y - ball.radius < 0) ball.dy = -ball.dy;
+                    if (ball.y + ball.radius > canvas.height) {
+                        if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+                            ball.dy = -ball.dy * 1.05; // Speed up
+                        } else {
+                           onGameEnd(false); // Lose
+                        }
+                    }
+                }
+
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    drawBricks();
+                    drawBall();
+                    drawPaddle();
+                }
+
+                function update() {
+                    movePaddle();
+                    moveBall();
+                    collisionDetection();
+                    draw();
+                    animationFrameId = requestAnimationFrame(update);
+                }
+                update();
+                
+                const mouseMoveHandler = (e) => {
+                    const relativeX = e.clientX - canvas.getBoundingClientRect().left;
+                    if (relativeX > 0 && relativeX < canvas.width) {
+                        paddle.x = relativeX - paddle.width / 2;
+                    }
+                };
+                
+                const touchMoveHandler = (e) => {
+                    const relativeX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+                    if (relativeX > 0 && relativeX < canvas.width) {
+                        paddle.x = relativeX - paddle.width / 2;
+                    }
+                };
+
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('touchmove', touchMoveHandler, { passive: true });
+                window.addEventListener('resize', resizeCanvas);
+
+
+                return () => {
+                    cancelAnimationFrame(animationFrameId);
+                    document.removeEventListener('mousemove', mouseMoveHandler);
+                    document.removeEventListener('touchmove', touchMoveHandler);
+                    window.removeEventListener('resize', resizeCanvas);
+                };
+            }, []);
+            
+            return <canvas ref={canvasRef} className="w-full h-auto bg-black/30 rounded-lg"></canvas>;
+        };
+        
+        // --- Main App Component ---
+        function App() {
+            // --- PERSONALIZATION SECTION ---
+            const userData = {
+                name: "Ishan Yadav",
+                title: "M.S. Computer Science @ NYU",
+                tagline: "Building intelligent systems with a foundation in multimodal and generative AI.",
+                bio: "As a Master's student at NYU's Courant Institute, I'm immersed in the world of machine learning, data science, and scalable software. My passion lies in transforming raw data into actionable insights and building robust applications that solve real-world problems. With experience in generative models, computer vision, and full-stack development, I thrive in collaborative environments and am driven by a curiosity to learn and innovate.",
+                email: "iy2159@nyu.edu",
+                github: "https://github.com/jdu8", // Assuming from CV
+                linkedin: "https://www.linkedin.com/in/ishan-yadav-jdu8/", // Assuming from CV
+            };
+
+            const skills = {
+                "Languages": ["Python", "C++", "R", "JavaScript", "SQL"],
+                "ML/AI": ["TensorFlow", "PyTorch", "LLMs", "Reinforcement Learning", "Vision Models", "RAG", "Generative Models", "Multimodal Systems"],
+                "Tools & Platforms": ["Tableau", "Excel", "MongoDB", "MySQL", "Qdrant", "Flask", "React", "Git", "Docker"],
+            };
+            
+            const projects = [
+                {
+                    title: "Sustainable Shopper",
+                    description: "A virtual try-on system using diffusion models to generate photorealistic images of users wearing selected clothing items. Includes a FAISS & CLIP powered similarity search for sustainable alternatives.",
+                    tags: ["Diffusion Models", "PyTorch", "React", "Flask", "MongoDB", "FAISS"],
+                    jobTypes: ["Generative AI", "ML Engineering", "Full Stack"],
+                    insight: "Practical application of generative AI for e-commerce."
+                },
+                {
+                    title: "RAG Based Chatbot",
+                    description: "Built an ETL pipeline scraping over 10k documents and YouTube transcripts. Fine-tuned a LLaMA model via knowledge distillation and deployed it in a Docker container.",
+                    tags: ["LLMs", "Hugging Face", "MongoDB", "Qdrant", "Docker"],
+                    jobTypes: ["Generative AI", "ML Engineering", "Data Science"],
+                    insight: "Fine-tuned LLM via knowledge distillation from ChatGPT."
+                },
+                {
+                    title: "Language Based Audio Retrieval",
+                    description: "Multimodal model for the 2024 DCASE challenge, matching natural language queries to audio files. Implemented advanced data augmentation and contrastive learning techniques.",
+                    tags: ["PyTorch", "Audio Encoders", "Text Encoders", "Contrastive Learning"],
+                    jobTypes: ["ML Engineering", "Data Science"],
+                    insight: "60% improvement in Mean Average Precision over baseline."
+                },
+                {
+                    title: "Sales Analysis Dashboard",
+                    description: "Built an interactive Tableau dashboard to visualize key metrics like revenue trends, product performance, and regional sales, enabling data-driven decision making.",
+                    tags: ["Tableau", "Excel", "Data Visualization"],
+                    jobTypes: ["Data Analyst"],
+                    insight: "Streamlined analysis workflow for reporting accuracy."
+                },
+                {
+                    title: "Samsung Internship Project",
+                    description: "Implemented SOTA object detection models (YOLO, ViT) for text localization, achieving 83% accuracy for Indic languages. Optimized the video processing pipeline for mobile devices.",
+                    tags: ["Object Detection", "YOLO", "Vision Transformers", "Python"],
+                    jobTypes: ["ML Engineering", "Data Science"],
+                    insight: "30% faster processing on resource-constrained devices."
+                },
+                {
+                    title: "Heart Health Monitoring Device",
+                    description: "A wearable device using ESP32 and an ECG sensor to detect heart anomalies with a lightweight ML model, achieving 95% accuracy and alerting users in real time via a WebSockets dashboard.",
+                    tags: ["ESP32", "IoT", "Machine Learning", "WebSockets"],
+                    jobTypes: ["Software Engineer", "IoT"],
+                    insight: "Achieved 95% accuracy with a lightweight on-device model."
+                }
+            ];
+
+            const experience = [
+                {
+                    role: "Your New Role",
+                    company: "Your New Company",
+                    date: "Aug 2024 - Present",
+                    description: "Describe your key responsibilities and achievements here. Keep it concise and impactful."
+                },
+                {
+                    role: "Private Tutor",
+                    company: "Self-Employed",
+                    date: "Jan 2024 - July 2024",
+                    description: "Provided individualized STEM tutoring to 15+ middle school students, resulting in a 20% improvement in average test scores and designed summer coding bootcamps."
+                },
+                {
+                    role: "Intern",
+                    company: "Samsung",
+                    date: "Dec 2022 - Aug 2023",
+                    description: "Implemented SOTA object detection architectures for text localization and engineered a corpus-based autocorrect algorithm, enhancing system reliability."
+                },
+                {
+                    role: "Software Developer",
+                    company: "Team Ardra",
+                    date: "Jan 2021 - May 2023",
+                    description: "Developed a hybrid path planning algorithm combining DQN reinforcement learning with traditional methods, achieving an 18% reduction in path length."
+                }
+            ];
+
+            const cvHighlights = [
+                "M.S. in Computer Science @ NYU", 
+                "Specializing in LLMs & Generative AI", 
+                "Intern @ Samsung", 
+                "Developed RAG Chatbot with fine-tuned LLaMA",
+                "60% Mean Average Precision improvement in DCASE challenge",
+                "Contact: iy2159@nyu.edu"
+            ];
+
+            // --- END PERSONALIZATION ---
+
+            const [isGameActive, setGameActive] = useState(false);
+            const [gameResult, setGameResult] = useState(null);
+            const [projectFilter, setProjectFilter] = useState('All');
+            
+            const jobTypes = ['All', ...new Set(projects.flatMap(p => p.jobTypes))];
+            const filteredProjects = projectFilter === 'All' 
+                ? projects 
+                : projects.filter(p => p.jobTypes.includes(projectFilter));
+
+            const handleGameEnd = (isWin) => {
+                 setGameResult(isWin ? 'ACCESS GRANTED' : 'FIREWALL RE-ENGAGED');
+                 setTimeout(() => {
+                     setGameActive(false);
+                     setGameResult(null);
+                 }, 3000);
+            }
+
+            return (
+                <div className="min-h-screen">
+                    <main className="container mx-auto px-6 md:px-10 py-12">
+                        {/* --- Hero Section --- */}
+                        <section id="home" className="min-h-screen flex flex-col justify-center items-start text-left">
+                            <div className="max-w-3xl">
+                                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 glitch-hover">
+                                    {userData.name}
+                                </h1>
+                                <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">
+                                    {userData.title}
+                                </h2>
+                                <p className="text-lg text-gray-300 max-w-xl mb-8">
+                                    {userData.tagline}
+                                </p>
+                                <a href="#projects" className="inline-block bg-[var(--secondary)] text-white font-bold px-6 py-3 rounded-md button-glow">
+                                    View My Work
+                                </a>
+                            </div>
+                            <div className="absolute bottom-10 left-0 w-full">
+                                <div className="ticker-wrap">
+                                    <div className="ticker">
+                                        {cvHighlights.map((item, i) => <div key={i} className="ticker-item">{item}</div>)}
+                                        {cvHighlights.map((item, i) => <div key={i+cvHighlights.length} className="ticker-item">{item}</div>)}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* --- About Section --- */}
+                        <section id="about" className="py-24">
+                            <h2 className="text-3xl font-bold text-white mb-8">01. About Me</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+                                <div className="md:col-span-2 text-lg text-gray-300 space-y-4">
+                                    <p>{userData.bio}</p>
+                                    <p>When not at the keyboard, I'm exploring NYC, hunting for the best coffee, or contributing to open-source projects.</p>
+                                </div>
+                                <div className="flex justify-center">
+                                    <div className="w-52 h-52 rounded-md bg-[var(--bg-medium)] p-2 glitch-hover">
+                                        <div className="w-full h-full border-2 border-[var(--primary)] rounded-sm flex items-center justify-center">
+                                            <img src={`https://placehold.co/200x200/0d0c1d/e0218a?text=${userData.name.split(' ').map(n=>n[0]).join('')}`} alt="Pixel art avatar" className="w-full h-full object-cover"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* --- Experience Section --- */}
+                        <section id="experience" className="py-24">
+                            <h2 className="text-3xl font-bold text-white mb-12">02. Career Trajectory</h2>
+                            <div className="max-w-3xl mx-auto">
+                                <div className="relative border-l-2 border-[var(--bg-medium)]">
+                                    {experience.map((job, index) => (
+                                        <div key={index} className="mb-10 ml-6">
+                                            <span className="absolute flex items-center justify-center w-4 h-4 bg-[var(--secondary)] rounded-full -left-2 ring-4 ring-[var(--bg-dark)]"></span>
+                                            <h3 className="flex items-center mb-1 text-xl font-semibold text-white">{job.role} <span className="text-[var(--primary)] text-sm font-medium ml-3">@ {job.company}</span></h3>
+                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-500">{job.date}</time>
+                                            <p className="text-gray-400">{job.description}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                        
+                        {/* --- Skills Section --- */}
+                        <section id="skills" className="py-24">
+                             <h2 className="text-3xl font-bold text-white mb-8">03. Skillset Matrix</h2>
+                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {Object.entries(skills).map(([category, skillList]) => (
+                                    <div key={category} className="bg-[var(--bg-medium)] p-6 rounded-lg border border-white/10">
+                                        <h3 className="text-xl font-bold text-[var(--secondary)] mb-4">{category}</h3>
+                                        <ul className="flex flex-wrap gap-2">
+                                            {skillList.map(skill => <li key={skill} className="bg-gray-700 text-gray-200 text-sm font-medium px-3 py-1 rounded-full">{skill}</li>)}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-12 text-center">
+                                {!isGameActive ? (
+                                    <button onClick={() => setGameActive(true)} className="bg-[var(--primary)] text-white font-bold px-6 py-3 rounded-md transition-all hover:bg-opacity-80">
+                                        INITIATE SKILLS DIAGNOSTIC
+                                    </button>
+                                ) : (
+                                    <div className="max-w-2xl mx-auto">
+                                        {gameResult ? (
+                                            <p className="text-2xl font-bold text-glow">{gameResult}</p>
+                                        ) : (
+                                             <SkillsBreaker skills={Object.values(skills).flat()} onGameEnd={handleGameEnd} />
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* --- Projects Section --- */}
+                        <section id="projects" className="py-24">
+                            <h2 className="text-3xl font-bold text-white mb-8">04. Featured Projects</h2>
+                            <div className="flex flex-wrap justify-center gap-2 mb-10">
+                                {jobTypes.map(type => (
+                                    <button 
+                                        key={type} 
+                                        onClick={() => setProjectFilter(type)}
+                                        className={`font-mono px-4 py-2 text-sm rounded-full border transition-colors ${projectFilter === type ? 'bg-[var(--primary)] border-[var(--primary)] text-white' : 'border-gray-600 text-gray-400 hover:bg-gray-700'}`}
+                                    >
+                                        {type}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {filteredProjects.map((project, index) => (
+                                    <div key={project.title} className="bg-[var(--bg-medium)] rounded-lg p-6 flex flex-col justify-between border border-white/10 transition-all duration-300 hover:border-[var(--primary)] hover:scale-105">
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>
+                                            <p className="text-gray-400 mb-4">{project.description}</p>
+                                            <p className="font-mono text-[var(--accent)] text-sm mb-4">
+                                                {project.insight && `[+] ${project.insight}`}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <ul className="flex flex-wrap gap-2 mb-4">
+                                                {project.tags.map(tag => <li key={tag} className="bg-gray-700 text-sm px-2 py-1 rounded">{tag}</li>)}
+                                            </ul>
+                                            <div className="flex space-x-4">
+                                                 <a href={userData.github} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[var(--primary)]">GitHub</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                        
+                        {/* --- Contact Section --- */}
+                        <section id="contact" className="py-24 text-center">
+                            <h2 className="text-3xl font-bold text-white mb-4">05. Get In Touch</h2>
+                            <p className="text-lg text-gray-400 max-w-xl mx-auto mb-8">
+                                I'm actively seeking new opportunities and collaborations. My inbox is always open, whether you have a question or just want to connect.
+                            </p>
+                             <a href={`mailto:${userData.email}`} className="inline-block bg-[var(--secondary)] text-white font-bold px-8 py-4 rounded-md button-glow">
+                                Say Hello
+                            </a>
+                        </section>
+
+                    </main>
+                    {/* --- Footer --- */}
+                    <footer className="text-center py-6 text-gray-500">
+                        <div className="flex justify-center space-x-6 mb-4">
+                             <a href={userData.github} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--primary)]">GitHub</a>
+                             <a href={userData.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--primary)]">LinkedIn</a>
+                        </div>
+                        <p>Designed & Built by {userData.name}</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
