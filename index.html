@@ -1,4 +1,4 @@
-x   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -64,41 +64,19 @@ x   <!DOCTYPE html>
         .button-glow:hover {
             box-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), inset 0 0 10px var(--secondary);
         }
-        .glitch-hover:hover {
-            animation: glitch 0.3s linear;
-        }
         @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
+            0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); }
         }
+        .glitch-hover:hover { animation: glitch 0.3s linear; }
         /* News Ticker Animation */
-        .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
-            background-color: rgba(0,0,0,0.2);
-            padding: 10px 0;
-            border-top: 1px solid var(--secondary);
-            border-bottom: 1px solid var(--secondary);
-        }
-        .ticker {
-            display: inline-block;
-            white-space: nowrap;
-            padding-left: 100%;
-            animation: ticker 30s linear infinite;
-        }
-        .ticker-item {
-            display: inline-block;
-            padding: 0 2rem;
-            color: var(--secondary);
-        }
-        @keyframes ticker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
+        .ticker-wrap { width: 100%; overflow: hidden; background-color: rgba(0,0,0,0.2); padding: 10px 0; border-top: 1px solid var(--secondary); border-bottom: 1px solid var(--secondary); }
+        .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 30s linear infinite; }
+        .ticker-item { display: inline-block; padding: 0 2rem; color: var(--secondary); }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        
+        /* Bouncy Arrow Animation */
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
+        .bouncy-arrow { animation: bounce 2s infinite; }
     </style>
 </head>
 <body>
@@ -106,37 +84,104 @@ x   <!DOCTYPE html>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
+        
+        // --- Animated Text Component (for Hero) ---
+        const AnimatedText = ({ text }) => {
+            const [displayText, setDisplayText] = useState('');
+            const targetText = text ? text.toUpperCase() : '';
+            
+            useEffect(() => {
+                if (!targetText) return;
+                const chars = '!<>-_\\/[]{}—=+*^?#________';
+                let iteration = 0;
+                let interval = setInterval(() => {
+                    const newText = targetText.split('')
+                        .map((letter, index) => (index < iteration) ? targetText[index] : chars[Math.floor(Math.random() * chars.length)])
+                        .join('');
+                    setDisplayText(newText);
+                    if (iteration >= targetText.length) clearInterval(interval);
+                    iteration += 1 / 3;
+                }, 40);
+                return () => clearInterval(interval);
+            }, [targetText]);
 
-        // --- GAME: Skills Breaker (Breakout) ---
+            return <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 glitch-hover">{displayText}</h1>;
+        };
+        
+        // --- Header Component with Scroll Logic ---
+        const Header = ({ navLinks, onAnimationComplete }) => {
+            const [visible, setVisible] = useState(false);
+            const [show, setShow] = useState(true);
+            const lastScrollY = useRef(0);
+
+            useEffect(() => {
+                const controlNavbar = () => {
+                    if (window.scrollY > lastScrollY.current) { // if scroll down hide the navbar
+                        setShow(false);
+                    } else { // if scroll up show the navbar
+                        setShow(true);
+                    }
+                    lastScrollY.current = window.scrollY;
+                };
+                window.addEventListener('scroll', controlNavbar);
+                return () => window.removeEventListener('scroll', controlNavbar);
+            }, []);
+            
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    setVisible(true);
+                    if(onAnimationComplete) onAnimationComplete();
+                }, 2000); // Should match the timing of the name animation
+                return () => clearTimeout(timer);
+            }, [onAnimationComplete]);
+
+            return (
+                <header className={`fixed top-0 left-0 w-full z-50 bg-[var(--bg-dark)]/80 backdrop-blur-sm transition-transform duration-300 ${show ? 'translate-y-0' : '-translate-y-full'}`}>
+                    <div className="container mx-auto px-6 md:px-10 py-4">
+                        <nav className={`transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0'} flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2`}>
+                            {navLinks.map(link => (
+                                <a key={link.name} href={link.href} className="text-gray-300 hover:text-[var(--primary)] transition-colors text-lg">
+                                    {link.name}
+                                </a>
+                            ))}
+                        </nav>
+                    </div>
+                </header>
+            );
+        };
+        
+        // --- GAME: Skills Breaker (Breakout) - UPDATED ---
         const SkillsBreaker = ({ skills, onGameEnd }) => {
             const canvasRef = useRef(null);
-            // ... existing SkillsBreaker game code ...
             useEffect(() => {
                 const canvas = canvasRef.current;
                 const ctx = canvas.getContext('2d');
                 let animationFrameId;
 
                 const resizeCanvas = () => {
-                    canvas.width = canvas.offsetWidth;
-                    canvas.height = canvas.offsetWidth * 0.6;
+                    const container = canvas.parentElement;
+                    canvas.width = container.offsetWidth;
+                    canvas.height = container.offsetWidth > 600 ? 400 : container.offsetWidth * 0.7;
                 };
-                resizeCanvas();
-
-                // Game Objects
-                const paddle = { x: canvas.width / 2 - 50, y: canvas.height - 20, width: 100, height: 10, dx: 0 };
-                const ball = { x: canvas.width / 2, y: canvas.height - 40, radius: 7, dx: 3, dy: -3 };
-                const brickRowCount = 4;
-                const brickColumnCount = 6;
-                const bricks = [];
-                const brickInfo = { width: (canvas.width - 70) / brickColumnCount, height: 20, padding: 10, offsetTop: 30, offsetLeft: 30 };
                 
-                for (let c = 0; c < brickColumnCount; c++) {
-                    bricks[c] = [];
-                    for (let r = 0; r < brickRowCount; r++) {
-                        const skillIndex = (r * brickColumnCount + c) % skills.length;
-                        bricks[c][r] = { x: 0, y: 0, status: 1, text: skills[skillIndex] };
+                let paddle, ball, bricks, brickInfo;
+                
+                const initGame = () => {
+                    resizeCanvas();
+                    paddle = { x: canvas.width / 2 - 50, y: canvas.height - 20, width: 100, height: 10, dx: 0, speed: 7 };
+                    ball = { x: canvas.width / 2, y: canvas.height - 40, radius: 7, dx: (canvas.width / 150), dy: -(canvas.width / 150) };
+                    brickInfo = { width: (canvas.width - 70) / 6, height: 20, padding: 10, offsetTop: 30, offsetLeft: 30 };
+                    bricks = [];
+                    for (let c = 0; c < 6; c++) {
+                        bricks[c] = [];
+                        for (let r = 0; r < 4; r++) {
+                            const skillIndex = (r * 6 + c) % skills.length;
+                            bricks[c][r] = { x: 0, y: 0, status: 1, text: skills[skillIndex] };
+                        }
                     }
-                }
+                };
+                
+                initGame();
 
                 function drawBricks() {
                     let bricksBroken = 0;
@@ -158,11 +203,10 @@ x   <!DOCTYPE html>
                             }
                         });
                     });
-                    if (bricksBroken === brickRowCount * brickColumnCount) {
+                    if (bricksBroken === 4 * 6) {
                         onGameEnd(true); // Win
                     }
                 }
-
                 function drawBall() {
                     ctx.beginPath();
                     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -170,7 +214,6 @@ x   <!DOCTYPE html>
                     ctx.fill();
                     ctx.closePath();
                 }
-                
                 function drawPaddle() {
                     ctx.beginPath();
                     ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
@@ -178,18 +221,15 @@ x   <!DOCTYPE html>
                     ctx.fill();
                     ctx.closePath();
                 }
-
                 function collisionDetection() {
-                    bricks.forEach(column => {
-                        column.forEach(brick => {
-                            if (brick.status === 1) {
-                                if (ball.x > brick.x && ball.x < brick.x + brickInfo.width && ball.y > brick.y && ball.y < brick.y + brickInfo.height) {
-                                    ball.dy = -ball.dy;
-                                    brick.status = 0;
-                                }
+                    bricks.forEach(column => column.forEach(brick => {
+                        if (brick.status === 1) {
+                            if (ball.x > brick.x && ball.x < brick.x + brickInfo.width && ball.y > brick.y && ball.y < brick.y + brickInfo.height) {
+                                ball.dy = -ball.dy;
+                                brick.status = 0;
                             }
-                        });
-                    });
+                        }
+                    }));
                 }
 
                 function movePaddle() {
@@ -197,18 +237,23 @@ x   <!DOCTYPE html>
                     if (paddle.x < 0) paddle.x = 0;
                     if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
                 }
-
+                
                 function moveBall() {
                     ball.x += ball.dx;
                     ball.y += ball.dy;
                     if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) ball.dx = -ball.dx;
                     if (ball.y - ball.radius < 0) ball.dy = -ball.dy;
-                    if (ball.y + ball.radius > canvas.height) {
-                        if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-                            ball.dy = -ball.dy * 1.05; // Speed up
-                        } else {
-                           onGameEnd(false); // Lose
+
+                    // UPDATED Paddle Collision
+                    if (ball.y + ball.radius > paddle.y && ball.y - ball.radius < paddle.y + paddle.height && ball.x + ball.radius > paddle.x && ball.x - ball.radius < paddle.x + paddle.width) {
+                        if (ball.dy > 0) { // Only trigger bounce if ball is moving down
+                           ball.dy = -ball.dy;
+                           // Add slight angle change based on where it hits the paddle
+                           let collidePoint = ball.x - (paddle.x + paddle.width / 2);
+                           ball.dx = collidePoint * 0.1;
                         }
+                    } else if (ball.y + ball.radius > canvas.height) { // Ball missed paddle
+                        onGameEnd(false);
                     }
                 }
 
@@ -218,7 +263,6 @@ x   <!DOCTYPE html>
                     drawBall();
                     drawPaddle();
                 }
-
                 function update() {
                     movePaddle();
                     moveBall();
@@ -228,34 +272,68 @@ x   <!DOCTYPE html>
                 }
                 update();
                 
-                const mouseMoveHandler = (e) => {
+                const keyDownHandler = (e) => {
+                    if(e.key === "Right" || e.key === "ArrowRight" || e.key.toLowerCase() === "d") paddle.dx = paddle.speed;
+                    else if(e.key === "Left" || e.key === "ArrowLeft" || e.key.toLowerCase() === "a") paddle.dx = -paddle.speed;
+                };
+                const keyUpHandler = (e) => {
+                    if(["Right", "ArrowRight", "d", "Left", "ArrowLeft", "a"].includes(e.key) || ["right", "arrowright", "d", "left", "arrowleft", "a"].includes(e.key.toLowerCase())) paddle.dx = 0;
+                };
+                const mouseMoveHandler = e => {
                     const relativeX = e.clientX - canvas.getBoundingClientRect().left;
-                    if (relativeX > 0 && relativeX < canvas.width) {
-                        paddle.x = relativeX - paddle.width / 2;
-                    }
+                    if (relativeX > 0 && relativeX < canvas.width) paddle.x = relativeX - paddle.width / 2;
                 };
-                
-                const touchMoveHandler = (e) => {
+                const touchMoveHandler = e => {
+                    e.preventDefault();
                     const relativeX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-                    if (relativeX > 0 && relativeX < canvas.width) {
-                        paddle.x = relativeX - paddle.width / 2;
-                    }
+                    if (relativeX > 0 && relativeX < canvas.width) paddle.x = relativeX - paddle.width / 2;
                 };
 
-                document.addEventListener('mousemove', mouseMoveHandler);
-                document.addEventListener('touchmove', touchMoveHandler, { passive: true });
-                window.addEventListener('resize', resizeCanvas);
-
+                document.addEventListener('keydown', keyDownHandler);
+                document.addEventListener('keyup', keyUpHandler);
+                canvas.addEventListener('mousemove', mouseMoveHandler);
+                canvas.addEventListener('touchmove', touchMoveHandler, { passive: false });
+                window.addEventListener('resize', initGame);
 
                 return () => {
                     cancelAnimationFrame(animationFrameId);
-                    document.removeEventListener('mousemove', mouseMoveHandler);
-                    document.removeEventListener('touchmove', touchMoveHandler);
-                    window.removeEventListener('resize', resizeCanvas);
+                    document.removeEventListener('keydown', keyDownHandler); document.removeEventListener('keyup', keyUpHandler);
+                    canvas.removeEventListener('mousemove', mouseMoveHandler); canvas.removeEventListener('touchmove', touchMoveHandler);
+                    window.removeEventListener('resize', initGame);
                 };
             }, []);
-            
-            return <canvas ref={canvasRef} className="w-full h-auto bg-black/30 rounded-lg"></canvas>;
+            return <canvas ref={canvasRef} className="w-full max-w-3xl mx-auto h-auto bg-black/30 rounded-lg cursor-none"></canvas>;
+        };
+
+        // --- NEW: Skill Icon Component ---
+        const SkillIcon = ({ name }) => {
+            const icons = {
+                python: 'M12.3 4.5C12.3 4.5 12.3 4.5 12.3 4.5C12.3 4.5 12.3 4.5 12.3 4.5C10.7 4.5 9.4 5.2 8.5 6.4C8.5 6.4 8.5 6.4 8.5 6.4L8.5 6.4C8.5 6.4 8.5 6.4 8.5 6.4C7.8 7.3 7.4 8.5 7.4 9.8C7.4 9.8 7.4 9.8 7.4 9.8C7.4 9.8 7.4 9.8 7.4 9.8C7.4 11.1 7.8 12.2 8.5 13.2C8.5 13.2 8.5 13.2 8.5 13.2L8.5 13.2C8.5 13.2 8.5 13.2 8.5 13.2C9.4 14.3 10.7 15 12 15C12 15 12 15 12 15C12 15 12 15 12 15C13.3 15 14.6 14.3 15.5 13.2C15.5 13.2 15.5 13.2 15.5 13.2L15.5 13.2C15.5 13.2 15.5 13.2 15.5 13.2C16.2 12.2 16.6 11.1 16.6 9.8C16.6 9.8 16.6 9.8 16.6 9.8C16.6 9.8 16.6 9.8 16.6 9.8C16.6 8.5 16.2 7.3 15.5 6.4C15.5 6.4 15.5 6.4 15.5 6.4L15.5 6.4C15.5 6.4 15.5 6.4 15.5 6.4C14.6 5.2 13.3 4.5 12 4.5C12 4.5 12 4.5 12 4.5ZM12 0C5.4 0 0 5.4 0 12C0 18.6 5.4 24 12 24C18.6 24 24 18.6 24 12C24 5.4 18.6 0 12 0Z',
+                'c++': 'M12.188 12.188a2.813 2.813 0 01-2.812-2.813 2.813 2.813 0 012.812-2.812 2.813 2.813 0 012.813 2.812 2.813 2.813 0 01-2.813 2.813zm0-3.75a.938.938 0 100 1.876.938.938 0 000-1.876z M24 12c0-3.83-2.26-7.22-5.62-8.86l-.27-.13-.13.27C16.5 7.15 14.47 9.38 12 9.38S7.5 7.15 6.02 3.28l-.13-.27-.27.13C2.26 4.78 0 8.17 0 12c0 3.83 2.26 7.22 5.62 8.86l.27.13.13-.27C7.5 16.85 9.53 14.62 12 14.62s4.5 2.23 5.98 6.1l.13.27.27-.13C21.74 19.22 24 15.83 24 12zM12 21.19c-2.43 0-4.47-2.23-5.95-6.1l-.13-.27-.27.13c-3.36-1.64-5.62-5.03-5.62-8.86 0-3.83 2.26-7.22 5.62-8.86l.27-.13.13.27C7.53 2.23 9.57 0 12 0s4.47 2.23 5.95 6.1l.13.27.27-.13C21.74 4.78 24 8.17 24 12c0 3.83-2.26 7.22-5.62 8.86l-.27.13-.13-.27c-1.48-3.87-3.52-6.1-5.95-6.1zM12 2.81c-2.43 0-4.47 2.23-5.95 6.1l-.13.27-.27.13C2.29 10.85 0 14.24 0 18c0 3.83 2.26 7.22 5.62 8.86l.27.13.13-.27C7.5 23.15 9.53 20.92 12 20.92s4.5 2.23 5.98 6.1l.13.27.27-.13C21.74 25.22 24 21.83 24 18c0-3.83-2.26-7.22-5.62-8.86l-.27-.13-.13.27c-1.48 3.87-3.52 6.1-5.95 6.1z',
+                r: 'M18.15 13.425h-3.45v-2.7h3.45v2.7zm.825-5.925c0-.45-.3-.75-.825-.75h-3.45V4.05h3.45c.525 0 .825.3.825.75v2.7zM12 2.475C6.15 2.475 1.5 7.125 1.5 12.975S6.15 23.475 12 23.475 22.5 18.825 22.5 12.975S17.85 2.475 12 2.475zm6.975 11.775c0 .6-.45 1.05-1.05 1.05H15v1.2c0 .6-.45 1.05-1.05 1.05h-1.5c-.6 0-1.05-.45-1.05-1.05v-1.2H9.375c-2.325 0-4.2-1.875-4.2-4.2v-2.7c0-2.325 1.875-4.2 4.2-4.2H15c.6 0 1.05.45 1.05 1.05v2.7H15c-.6 0-1.05.45-1.05 1.05v1.2H15c.6 0 1.05.45 1.05 1.05v1.65c0 .6-.45 1.05-1.05 1.05h-3.45v2.7h3.45c.6 0 1.05.45 1.05 1.05v.9c0 .6-.45 1.05-1.05 1.05h-1.5c-.6 0-1.05-.45-1.05-1.05v-.9c0-2.325 1.875-4.2 4.2-4.2h2.775c.6 0 1.05.45 1.05 1.05v1.2z',
+                javascript: 'M0 0h24v24H0V0zm22.034 18.262c.385-1.218.57-2.483.57-3.794s-.185-2.576-.57-3.794H1.966c-.385 1.218-.57 2.483-.57 3.794s.185 2.576.57 3.794h20.068zM2.844 9.125h18.312c-.52-1.52-1.226-2.92-2.09-4.172H4.934a12.356 12.356 0 00-2.09 4.172zm18.312 5.75H2.844c.864 1.252 1.57 2.652 2.09 4.172h14.132c.52-1.52 1.226-2.92 2.09-4.172z',
+                sql: 'M20.25 16.5H3.75V19.5H20.25V16.5ZM20.25 12H3.75V15H20.25V12ZM20.25 7.5H3.75V10.5H20.25V7.5ZM20.25 3H3.75V6H20.25V3ZM12 0C5.373 0 0 1.343 0 3V21C0 22.657 5.373 24 12 24C18.627 24 24 22.657 24 21V3C24 1.343 18.627 0 12 0Z',
+                tensorflow: 'M16.907 2.05l-4.707 8.153L7.5 2.05H2l7.793 13.5L2 21.95h5.5l4.707-8.153L16.907 21.95H22l-7.793-13.5L22 2.05h-5.093z',
+                pytorch: 'M21.052 9.43c-1.332 0-2.12.788-2.12 1.97v1.27c0 1.182.788 1.97 2.12 1.97s2.12-.788 2.12-1.97v-1.27c0-1.182-.788-1.97-2.12-1.97zm0 3.32c-.523 0-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7s.82.3.82.7v1.27c0 .4-.297.7-.82.7zM15.933 9.43c-1.332 0-2.12.788-2.12 1.97v1.27c0 1.182.788 1.97 2.12 1.97s2.12-.788 2.12-1.97v-1.27c0-1.182-.788-1.97-2.12-1.97zm0 3.32c-.523 0-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7s.82.3.82.7v1.27c0 .4-.297.7-.82.7zM2.948 14.72c1.332 0 2.12-.788 2.12-1.97V11.4c0-1.182-.788-1.97-2.12-1.97S.828 10.218.828 11.4v1.35c0 1.182.788 1.97 2.12 1.97zm0-3.32c.523 0 .82.3.82.7v1.27c0 .4-.297.7-.82.7s-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7zM8.067 14.72c1.332 0 2.12-.788 2.12-1.97V11.4c0-1.182-.788-1.97-2.12-1.97s-2.12.788-2.12 1.97v1.35c0 1.182.788 1.97 2.12 1.97zm0-3.32c.523 0 .82.3.82.7v1.27c0 .4-.297.7-.82.7s-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm9.052 10c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1zm-5.119 0c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1zM5.067 12c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1zm5.119 0c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1z',
+                tableau: 'M6.15 16.2H3V3h3.15v13.2zm5.7 0h-3V8.7h3v7.5zm5.7 0h-3V6.9h3v9.3zM21 3v13.2h-3V3h3zm-5.55-3h-2.1v24h2.1V0zm-5.7 0h-2.1v24h2.1V0zm-5.7 0H2.1v24h2.1V0z',
+                excel: 'M23.71,3.43,18.4,2.15a.79.79,0,0,0-.7.12l-5,3.87-4.43-3.8A.8.8,0,0,0,7.6.79L2.29,2.07A.79.79,0,0,0,1.58,2.8V21.2a.79.79,0,0,0,.71.72l5.31,1.28a.79.79,0,0,0,.7-.12l5-3.87,4.43,3.8a.8.8,0,0,0,.67.13l5.31-1.28A.79.79,0,0,0,24,21.2V4.15A.79.79,0,0,0,23.71,3.43ZM8,21,3,19.6V4.4L8,5.8ZM15,17.1,9.4,21.5,8,21V5.8L9.4,5.5l5.6,4.3ZM22,19.6,17,21V5.8l1.4-.3L22,4.4Z',
+                mongodb: 'M13.31,2.82a10.22,10.22,0,0,0-1.22-1.22,10.22,10.22,0,0,0-1.22,1.22C10.6,3.09,10.51,4,10.51,5v.19a.19.19,0,0,0,.19.19H12a2.2,2.2,0,0,1,2.2,2.2v8.83a2.2,2.2,0,0,1-2.2,2.2H10.7a.19.19,0,0,0-.19.19V19c0,1,.09,1.91.36,2.18a10.22,10.22,0,0,0,1.22,1.22,10.22,10.22,0,0,0,1.22-1.22c.27-.27.36-1.19.36-2.18v-.19a.19.19,0,0,0-.19-.19H12a2.2,2.2,0,0,1-2.2-2.2V7.59a2.2,2.2,0,0,1,2.2-2.2h1.12a.19.19,0,0,0,.19-.19V5C13.67,4,13.58,3.09,13.31,2.82ZM12,0A12,12,0,1,0,24,12,12,12,0,0,0,12,0Z',
+                mysql: 'M18,9.47a7.5,7.5,0,0,0-1.76-4.95,1.5,1.5,0,0,0,0-2.12,1.5,1.5,0,0,0-2.12,0,7.47,7.47,0,0,0-4.24,0,1.5,1.5,0,0,0-2.12,0,1.5,1.5,0,0,0,0,2.12A7.5,7.5,0,0,0,6,9.47v6.22a7.5,7.5,0,0,0-2.12-1.76,1.5,1.5,0,0,0-2.12,0,1.5,1.5,0,0,0,0,2.12,7.5,7.5,0,0,0,4.24,4.24,1.5,1.5,0,0,0,2.12,0,1.5,1.5,0,0,0,0-2.12,7.5,7.5,0,0,0-1.76-2.12V9.47a7.5,7.5,0,0,0,1.76-2.12,1.5,1.5,0,0,0,2.12,0,1.5,1.5,0,0,0,0-2.12,1.5,1.5,0,0,0-2.12,0,7.5,7.5,0,0,0-2.12,4.24h4.24a7.5,7.5,0,0,0-2.12-4.24,1.5,1.5,0,0,0-2.12,0,1.5,1.5,0,0,0,0,2.12,1.5,1.5,0,0,0,2.12,0,7.5,7.5,0,0,0,1.76,2.12v6.22a7.5,7.5,0,0,0-1.76,2.12,1.5,1.5,0,0,0,0,2.12,1.5,1.5,0,0,0,2.12,0,7.5,7.5,0,0,0,4.24-4.24,1.5,1.5,0,0,0,0-2.12,1.5,1.5,0,0,0-2.12,0,7.5,7.5,0,0,0-2.12,1.76V9.47a7.5,7.5,0,0,0,4.95-1.76,1.5,1.5,0,0,0,2.12,0,1.5,1.5,0,0,0,0-2.12,7.5,7.5,0,0,0-4.95-1.76Z',
+                flask: 'M18.66,9.13a.66.66,0,0,0-.91-.19L12,12.33,6.25,8.94a.66.66,0,0,0-.91.19.65.65,0,0,0,.19.9l6.11,3.49a.65.65,0,0,0,.7,0l6.11-3.49A.65.65,0,0,0,18.66,9.13ZM12,1.33A10.67,10.67,0,1,0,22.67,12,10.67,10.67,0,0,0,12,1.33ZM12,21.33a9.33,9.33,0,1,1,9.33-9.33A9.34,9.34,0,0,1,12,21.33Z',
+                react: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-8c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5-2.46 5.5-5.5 5.5-5.5-2.46-5.5-5.5zM12 4.5c-4.14 0-7.5 3.36-7.5 7.5s3.36 7.5 7.5 7.5 7.5-3.36 7.5-7.5-3.36-7.5-7.5-7.5z',
+                git: 'M23.36,10.43,13.57.64a2.1,2.1,0,0,0-3.14,0L.64,10.43a2.1,2.1,0,0,0,0,3.14l9.79,9.79a2.1,2.1,0,0,0,3.14,0l9.79-9.79a2.1,2.1,0,0,0,0-3.14ZM16.5,14.71a1.41,1.41,0,0,1,0-2l2.12-2.12-2.83-2.83L13.67,10a1.4,1.4,0,0,1-2,0L9.49,7.83,6.66,5l2.12-2.12a1.41,1.41,0,0,1,2,0l4.24,4.24a1.41,1.41,0,0,1,0,2L13,11.29l2.12,2.12A1.41,1.41,0,0,1,16.5,14.71Z',
+                docker: 'M23.31,9.65,21.07,9,21,8.37l-1.78-3a.35.35,0,0,0-.3-.17H16.29a.35.35,0,0,0-.3.17L14.21,9,12,9.65l-.57.21V2.62a.35.35,0,0,0-.35-.35H8.35a.35.35,0,0,0-.35.35v7.24l-.57-.21L5.11,9,3.33,5.2a.35.35,0,0,0-.3-.17H.35a.35.35,0,0,0-.3.57L2,9.65,0,15.12a.35.35,0,0,0,.3.57H3a.35.35,0,0,0,.3-.17L5.11,12l2.24.65.57.21V21.5a.35.35,0,0,0,.35.35h4.57a.35.35,0,0,0,.35-.35v-8.64l.57-.21,2.24-.65L18.62,15.5a.35.35,0,0,0,.3.17h2.67a.35.35,0,0,0,.3-.57ZM7.5,11.1a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,7.5,11.1Zm0-3.15A1.05,1.05,0,1,1,8.55,7,1.05,1.05,0,0,1,7.5,7.95Zm3.15,3.15a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,10.65,11.1Zm0-3.15a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,10.65,7.95Zm3.15,3.15a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,13.8,11.1Zm3.15,0a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,16.95,11.1Z',
+                default: 'M12,2a10,10,0,0,0-9.45,13.32l-1.2,4.8a1,1,0,0,0,1.27,1.27l4.8-1.2A10,10,0,1,0,12,2Zm5.71,9.48a1.5,1.5,0,0,1-1.24,1.24,7.85,7.85,0,0,1-4.47.88,8,8,0,0,1-4.47-.88,1.5,1.5,0,0,1-1.24-1.24A7.85,7.85,0,0,1,6,8.29,8,8,0,0,1,6.88,3.82a1.5,1.5,0,0,1,1.24-1.24,7.85,7.85,0,0,1,4.47-.88,8,8,0,0,1,4.47.88,1.5,1.5,0,0,1,1.24,1.24A7.85,7.85,0,0,1,18,8.29,8,8,0,0,1,17.12,11.48Z',
+            };
+            const iconSvg = icons[name.toLowerCase()] || icons['default'];
+            return (
+                <div className="flex flex-col items-center justify-center gap-2 p-4 bg-[var(--bg-medium)] rounded-lg border border-transparent hover:border-[var(--secondary)] transition-all">
+                    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 fill-current text-gray-300">
+                        <path d={iconSvg}/>
+                    </svg>
+                    <span className="font-mono text-sm text-center">{name}</span>
+                </div>
+            );
         };
         
         // --- Main App Component ---
@@ -267,16 +345,14 @@ x   <!DOCTYPE html>
                 tagline: "Building intelligent systems with a foundation in multimodal and generative AI.",
                 bio: "As a Master's student at NYU's Courant Institute, I'm immersed in the world of machine learning, data science, and scalable software. My passion lies in transforming raw data into actionable insights and building robust applications that solve real-world problems. With experience in generative models, computer vision, and full-stack development, I thrive in collaborative environments and am driven by a curiosity to learn and innovate.",
                 email: "iy2159@nyu.edu",
-                github: "https://github.com/jdu8", // Assuming from CV
-                linkedin: "https://www.linkedin.com/in/ishan-yadav-jdu8/", // Assuming from CV
+                github: "https://github.com/jdu8",
+                linkedin: "https://www.linkedin.com/in/ishan-yadav-jdu8/",
             };
-
             const skills = {
                 "Languages": ["Python", "C++", "R", "JavaScript", "SQL"],
                 "ML/AI": ["TensorFlow", "PyTorch", "LLMs", "Reinforcement Learning", "Vision Models", "RAG", "Generative Models", "Multimodal Systems"],
                 "Tools & Platforms": ["Tableau", "Excel", "MongoDB", "MySQL", "Qdrant", "Flask", "React", "Git", "Docker"],
             };
-            
             const projects = [
                 {
                     title: "Sustainable Shopper",
@@ -321,7 +397,6 @@ x   <!DOCTYPE html>
                     insight: "Achieved 95% accuracy with a lightweight on-device model."
                 }
             ];
-
             const experience = [
                 {
                     role: "Your New Role",
@@ -348,7 +423,6 @@ x   <!DOCTYPE html>
                     description: "Developed a hybrid path planning algorithm combining DQN reinforcement learning with traditional methods, achieving an 18% reduction in path length."
                 }
             ];
-
             const cvHighlights = [
                 "M.S. in Computer Science @ NYU", 
                 "Specializing in LLMs & Generative AI", 
@@ -357,17 +431,15 @@ x   <!DOCTYPE html>
                 "60% Mean Average Precision improvement in DCASE challenge",
                 "Contact: iy2159@nyu.edu"
             ];
-
             // --- END PERSONALIZATION ---
 
             const [isGameActive, setGameActive] = useState(false);
             const [gameResult, setGameResult] = useState(null);
             const [projectFilter, setProjectFilter] = useState('All');
+            const [showScrollPrompt, setShowScrollPrompt] = useState(false);
             
             const jobTypes = ['All', ...new Set(projects.flatMap(p => p.jobTypes))];
-            const filteredProjects = projectFilter === 'All' 
-                ? projects 
-                : projects.filter(p => p.jobTypes.includes(projectFilter));
+            const filteredProjects = projectFilter === 'All' ? projects : projects.filter(p => p.jobTypes.includes(projectFilter));
 
             const handleGameEnd = (isWin) => {
                  setGameResult(isWin ? 'ACCESS GRANTED' : 'FIREWALL RE-ENGAGED');
@@ -375,41 +447,41 @@ x   <!DOCTYPE html>
                      setGameActive(false);
                      setGameResult(null);
                  }, 3000);
-            }
+            };
+            
+            const navLinks = [
+                { name: "About", href: "#about"},
+                { name: "Experience", href: "#experience"},
+                { name: "Skills", href: "#skills"},
+                { name: "Projects", href: "#projects"},
+                { name: "Contact", href: "#contact"},
+            ];
 
             return (
-                <div className="min-h-screen">
-                    <main className="container mx-auto px-6 md:px-10 py-12">
-                        {/* --- Hero Section --- */}
-                        <section id="home" className="min-h-screen flex flex-col justify-center items-start text-left">
-                            <div className="max-w-3xl">
-                                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 glitch-hover">
-                                    {userData.name}
-                                </h1>
-                                <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">
-                                    {userData.title}
-                                </h2>
-                                <p className="text-lg text-gray-300 max-w-xl mb-8">
-                                    {userData.tagline}
-                                </p>
-                                <a href="#projects" className="inline-block bg-[var(--secondary)] text-white font-bold px-6 py-3 rounded-md button-glow">
-                                    View My Work
-                                </a>
+                <div>
+                    <Header navLinks={navLinks} onAnimationComplete={() => setShowScrollPrompt(true)} />
+                    <main className="container mx-auto px-6 md:px-10">
+                         <section id="home" className="min-h-screen flex flex-col justify-center items-start text-left relative">
+                             <div className="max-w-3xl pb-24 sm:pb-0">
+                                <AnimatedText text={userData.name} />
+                                <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">{userData.title}</h2>
+                                <p className="text-lg text-gray-300 max-w-xl mb-8">{userData.tagline}</p>
+                                <a href="#projects" className="inline-block bg-[var(--secondary)] text-white font-bold px-6 py-3 rounded-md button-glow">View My Work</a>
                             </div>
-                            <div className="absolute bottom-10 left-0 w-full">
-                                <div className="ticker-wrap">
-                                    <div className="ticker">
-                                        {cvHighlights.map((item, i) => <div key={i} className="ticker-item">{item}</div>)}
-                                        {cvHighlights.map((item, i) => <div key={i+cvHighlights.length} className="ticker-item">{item}</div>)}
-                                    </div>
+                            <div className={`absolute bottom-24 left-1/2 -translate-x-1/2 flex-col items-center gap-2 transition-opacity duration-500 ${showScrollPrompt ? 'opacity-100 flex' : 'opacity-0 hidden'}`}>
+                                <span className="font-mono text-sm text-gray-400">Scroll</span>
+                                <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center pt-2 bouncy-arrow">
+                                    <div className="w-1 h-2 bg-gray-400 rounded-full"></div>
                                 </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 w-full">
+                                <div className="ticker-wrap"><div className="ticker">{cvHighlights.map((item, i) => <div key={i} className="ticker-item">{item}</div>)}{cvHighlights.map((item, i) => <div key={i+cvHighlights.length} className="ticker-item">{item}</div>)}</div></div>
                             </div>
                         </section>
 
-                        {/* --- About Section --- */}
                         <section id="about" className="py-24">
-                            <h2 className="text-3xl font-bold text-white mb-8">01. About Me</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+                           <h2 className="text-3xl font-bold text-white mb-8">About Me</h2>
+                           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
                                 <div className="md:col-span-2 text-lg text-gray-300 space-y-4">
                                     <p>{userData.bio}</p>
                                     <p>When not at the keyboard, I'm exploring NYC, hunting for the best coffee, or contributing to open-source projects.</p>
@@ -423,11 +495,9 @@ x   <!DOCTYPE html>
                                 </div>
                             </div>
                         </section>
-
-                        {/* --- Experience Section --- */}
                         <section id="experience" className="py-24">
-                            <h2 className="text-3xl font-bold text-white mb-12">02. Career Trajectory</h2>
-                            <div className="max-w-3xl mx-auto">
+                           <h2 className="text-3xl font-bold text-white mb-12">Career Trajectory</h2>
+                           <div className="max-w-3xl mx-auto">
                                 <div className="relative border-l-2 border-[var(--bg-medium)]">
                                     {experience.map((job, index) => (
                                         <div key={index} className="mb-10 ml-6">
@@ -440,40 +510,21 @@ x   <!DOCTYPE html>
                                 </div>
                             </div>
                         </section>
-                        
-                        {/* --- Skills Section --- */}
                         <section id="skills" className="py-24">
-                             <h2 className="text-3xl font-bold text-white mb-8">03. Skillset Matrix</h2>
-                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {Object.entries(skills).map(([category, skillList]) => (
-                                    <div key={category} className="bg-[var(--bg-medium)] p-6 rounded-lg border border-white/10">
-                                        <h3 className="text-xl font-bold text-[var(--secondary)] mb-4">{category}</h3>
-                                        <ul className="flex flex-wrap gap-2">
-                                            {skillList.map(skill => <li key={skill} className="bg-gray-700 text-gray-200 text-sm font-medium px-3 py-1 rounded-full">{skill}</li>)}
-                                        </ul>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="mt-12 text-center">
-                                {!isGameActive ? (
-                                    <button onClick={() => setGameActive(true)} className="bg-[var(--primary)] text-white font-bold px-6 py-3 rounded-md transition-all hover:bg-opacity-80">
-                                        INITIATE SKILLS DIAGNOSTIC
-                                    </button>
+                           <h2 className="text-3xl font-bold text-white mb-8">Skillset Matrix</h2>
+                           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                               {Object.values(skills).flat().map(skill => <SkillIcon key={skill} name={skill} />)}
+                           </div>
+                           <div className="mt-12 text-center">
+                               {!isGameActive ? (
+                                    <button onClick={() => setGameActive(true)} className="bg-[var(--primary)] text-white font-bold px-6 py-3 rounded-md transition-all hover:bg-opacity-80">INITIATE SKILLS DIAGNOSTIC</button>
                                 ) : (
-                                    <div className="max-w-2xl mx-auto">
-                                        {gameResult ? (
-                                            <p className="text-2xl font-bold text-glow">{gameResult}</p>
-                                        ) : (
-                                             <SkillsBreaker skills={Object.values(skills).flat()} onGameEnd={handleGameEnd} />
-                                        )}
-                                    </div>
+                                    <div className="mt-4">{gameResult ? <p className="text-2xl font-bold text-glow">{gameResult}</p> : <SkillsBreaker skills={Object.values(skills).flat()} onGameEnd={handleGameEnd} />}</div>
                                 )}
                             </div>
                         </section>
-
-                        {/* --- Projects Section --- */}
                         <section id="projects" className="py-24">
-                            <h2 className="text-3xl font-bold text-white mb-8">04. Featured Projects</h2>
+                            <h2 className="text-3xl font-bold text-white mb-8">Featured Projects</h2>
                             <div className="flex flex-wrap justify-center gap-2 mb-10">
                                 {jobTypes.map(type => (
                                     <button 
@@ -507,20 +558,14 @@ x   <!DOCTYPE html>
                                 ))}
                             </div>
                         </section>
-                        
-                        {/* --- Contact Section --- */}
                         <section id="contact" className="py-24 text-center">
-                            <h2 className="text-3xl font-bold text-white mb-4">05. Get In Touch</h2>
+                            <h2 className="text-3xl font-bold text-white mb-4">Get In Touch</h2>
                             <p className="text-lg text-gray-400 max-w-xl mx-auto mb-8">
                                 I'm actively seeking new opportunities and collaborations. My inbox is always open, whether you have a question or just want to connect.
                             </p>
-                             <a href={`mailto:${userData.email}`} className="inline-block bg-[var(--secondary)] text-white font-bold px-8 py-4 rounded-md button-glow">
-                                Say Hello
-                            </a>
+                            <a href={`mailto:${userData.email}`} className="inline-block bg-[var(--secondary)] text-white font-bold px-8 py-4 rounded-md button-glow">Say Hello</a>
                         </section>
-
                     </main>
-                    {/* --- Footer --- */}
                     <footer className="text-center py-6 text-gray-500">
                         <div className="flex justify-center space-x-6 mb-4">
                              <a href={userData.github} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--primary)]">GitHub</a>
@@ -538,3 +583,4 @@ x   <!DOCTYPE html>
     </script>
 </body>
 </html>
+
