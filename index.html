@@ -93,38 +93,62 @@
         .flicker-in {
             animation: flickerIn 2s ease-in-out forwards;
         }
+
+        /* Hamburger Menu Styles */
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+        .hamburger-active .top-line {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger-active .middle-line {
+            opacity: 0;
+        }
+        .hamburger-active .bottom-line {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+        
+        /* Skill Glow Effect */
+        .skill-glow {
+            box-shadow: 0 0 8px var(--glow-color), 0 0 12px var(--glow-color), inset 0 0 6px var(--glow-color);
+            border-color: var(--glow-color);
+        }
+
+        /* Floating Score Text */
+        @keyframes float-up {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-50px); }
+        }
+        .floating-text {
+            animation: float-up 1.5s ease-out forwards;
+            text-shadow: 0px 0px 3px #000, 0px 0px 3px #000, 0px 0px 3px #000;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useCallback } = React;
         
-        // --- Animated Text Component (for Hero) ---
         const AnimatedText = ({ text }) => {
             const [displayText, setDisplayText] = useState('');
             const targetText = text ? text.toUpperCase() : '';
-            
             useEffect(() => {
                 if (!targetText) return;
                 const chars = '!<>-_\\/[]{}—=+*^?#________';
                 let iteration = 0;
-                let interval = setInterval(() => {
-                    const newText = targetText.split('')
-                        .map((letter, index) => (index < iteration) ? targetText[index] : chars[Math.floor(Math.random() * chars.length)])
-                        .join('');
+                const interval = setInterval(() => {
+                    const newText = targetText.split('').map((letter, index) => (index < iteration) ? targetText[index] : chars[Math.floor(Math.random() * chars.length)]).join('');
                     setDisplayText(newText);
                     if (iteration >= targetText.length) clearInterval(interval);
                     iteration += 1 / 3;
                 }, 40);
                 return () => clearInterval(interval);
             }, [targetText]);
-
             return <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 glitch-hover">{displayText}</h1>;
         };
 
-        // --- Logo Component ---
         const Logo = ({ size = 'w-12 h-12', isAnimated = false }) => {
             const textSize = size.includes('52') ? 'text-7xl' : 'text-2xl';
             return (
@@ -136,20 +160,16 @@
             );
         };
         
-        // --- Header Component with Scroll Logic ---
         const Header = ({ navLinks, onAnimationComplete }) => {
             const [visible, setVisible] = useState(false);
             const [show, setShow] = useState(true);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
             const lastScrollY = useRef(0);
 
             useEffect(() => {
                 const controlNavbar = () => {
-                    // updated to hide only after scrolling past a certain point
-                    if (window.scrollY > lastScrollY.current && window.scrollY > 100) { 
-                        setShow(false);
-                    } else { 
-                        setShow(true);
-                    }
+                    if (window.scrollY > lastScrollY.current && window.scrollY > 100) { setShow(false); } 
+                    else { setShow(true); }
                     lastScrollY.current = window.scrollY;
                 };
                 window.addEventListener('scroll', controlNavbar);
@@ -160,297 +180,116 @@
                 const timer = setTimeout(() => {
                     setVisible(true);
                     if(onAnimationComplete) onAnimationComplete();
-                }, 2000); // Should match the timing of the name animation
+                }, 2000);
                 return () => clearTimeout(timer);
             }, [onAnimationComplete]);
 
             return (
-                <header className={`fixed top-0 left-0 w-full z-50 bg-[var(--bg-dark)]/80 backdrop-blur-sm transition-transform duration-300 ${show ? 'translate-y-0' : '-translate-y-full'}`}>
-                    <div className="container mx-auto px-6 md:px-10 py-4 flex justify-between items-center">
-                        <Logo size="w-12 h-12" isAnimated={true} />
-                        <nav className={`transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0'} flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2`}>
-                            {navLinks.map(link => (
-                                <a key={link.name} href={link.href} className="text-gray-300 hover:text-[var(--primary)] transition-colors text-lg">
-                                    {link.name}
-                                </a>
-                            ))}
+                <>
+                    <header className={`fixed top-0 left-0 w-full z-50 bg-[var(--bg-dark)]/80 backdrop-blur-sm transition-transform duration-300 ${show ? 'translate-y-0' : '-translate-y-full'}`}>
+                        <div className="container mx-auto px-6 md:px-10 py-4 flex justify-between items-center">
+                            <Logo size="w-12 h-12" isAnimated={true} />
+                            <nav className={`hidden md:flex transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0'} flex-wrap justify-center md:justify-end gap-x-6 gap-y-2`}>
+                                {navLinks.map(link => <a key={link.name} href={link.href} className="text-gray-300 hover:text-[var(--primary)] transition-colors text-lg">{link.name}</a>)}
+                            </nav>
+                             <div className="md:hidden">
+                                <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`z-50 space-y-2 ${isMenuOpen ? 'hamburger-active' : ''}`}>
+                                    <span className="block w-6 h-0.5 bg-white hamburger-line top-line"></span>
+                                    <span className="block w-6 h-0.5 bg-white hamburger-line middle-line"></span>
+                                    <span className="block w-6 h-0.5 bg-white hamburger-line bottom-line"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+                     <div className={`md:hidden fixed inset-0 bg-[var(--bg-dark)]/95 backdrop-blur-lg z-40 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                        <nav className="flex flex-col items-center justify-center h-full gap-y-8">
+                            {navLinks.map(link => <a key={link.name} href={link.href} className="text-3xl font-mono text-gray-200 hover:text-[var(--primary)]" onClick={() => setIsMenuOpen(false)}>{link.name}</a>)}
                         </nav>
                     </div>
-                </header>
+                </>
             );
         };
         
-        // --- NEW: Circuit Board Animation ---
         const CircuitBoardAnimation = () => {
             const canvasRef = useRef(null);
-
             useEffect(() => {
-                /*
-                // --- OLD "ABSTRACT PATHS" ANIMATION LOGIC (Commented Out) ---
                 const canvas = canvasRef.current;
                 const ctx = canvas.getContext('2d');
                 let animationFrameId;
-
-                const resizeCanvas = () => {
-                    canvas.width = canvas.offsetWidth;
-                    canvas.height = canvas.offsetHeight;
-                };
-                
-                const gridSize = 20;
-                const nodes = [];
-                const connections = [];
-
-                class Node {
-                    constructor(x, y) {
-                        this.x = x;
-                        this.y = y;
-                        this.radius = Math.random() * 2 + 1;
-                        this.baseColor = 'rgba(0, 255, 255, 0.3)';
-                        this.glowColor = 'rgba(0, 255, 255, 1)';
-                        this.isActive = false;
-                        this.activationTime = 0;
-                    }
-
-                    draw() {
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = this.baseColor;
-                        ctx.fill();
-
-                        if (this.isActive) {
-                            const glowAmount = Math.sin(this.activationTime * Math.PI);
-                            ctx.fillStyle = this.glowColor;
-                            ctx.globalAlpha = glowAmount;
-                            ctx.beginPath();
-                            ctx.arc(this.x, this.y, this.radius + 2, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.globalAlpha = 1;
-                        }
-                    }
-
-                    update(deltaTime) {
-                        if (this.isActive) {
-                            this.activationTime += deltaTime;
-                            if (this.activationTime >= 1) {
-                                this.isActive = false;
-                                this.activationTime = 0;
-                            }
-                        }
-                    }
-                }
-
-                class Connection {
-                    constructor(node1, node2) {
-                        this.node1 = node1;
-                        this.node2 = node2;
-                        this.progress = 0;
-                        this.speed = Math.random() * 0.5 + 0.2;
-                        this.color = 'rgba(224, 33, 138, 0.7)';
-                    }
-
-                    draw() {
-                        const x1 = this.node1.x;
-                        const y1 = this.node1.y;
-                        const x2 = this.node2.x;
-                        const y2 = this.node2.y;
-                        
-                        const currentX = x1 + (x2 - x1) * this.progress;
-                        const currentY = y1 + (y2 - y1) * this.progress;
-
-                        ctx.beginPath();
-                        ctx.moveTo(x1, y1);
-                        ctx.lineTo(currentX, currentY);
-                        ctx.strokeStyle = this.color;
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                        
-                        // Glowing head
-                        ctx.beginPath();
-                        ctx.arc(currentX, currentY, 2, 0, Math.PI * 2);
-                        ctx.fillStyle = this.color;
-                        ctx.fill();
-                    }
-
-                    update(deltaTime) {
-                        this.progress += this.speed * deltaTime;
-                        if (this.progress >= 1) {
-                            this.node2.isActive = true;
-                            this.progress = 1; // Mark for removal
-                        }
-                    }
-                }
-
-                const init = () => {
-                    resizeCanvas();
-                    nodes.length = 0;
-                    connections.length = 0;
-                    const cellWidth = canvas.width / gridSize;
-                    const cellHeight = canvas.height / gridSize;
-                    for (let i = 0; i < gridSize; i++) {
-                        for (let j = 0; j < gridSize; j++) {
-                            const x = cellWidth * i + cellWidth / 2 + (Math.random() - 0.5) * 10;
-                            const y = cellHeight * j + cellHeight / 2 + (Math.random() - 0.5) * 10;
-                            nodes.push(new Node(x, y));
-                        }
-                    }
-                };
-
-                const addRandomConnection = () => {
-                    const node1 = nodes[Math.floor(Math.random() * nodes.length)];
-                    let node2 = nodes[Math.floor(Math.random() * nodes.length)];
-                    while(node1 === node2) {
-                         node2 = nodes[Math.floor(Math.random() * nodes.length)];
-                    }
-                    node1.isActive = true;
-                    connections.push(new Connection(node1, node2));
-                };
-
-                let lastTime = 0;
-                const animate = (timestamp) => {
-                    const deltaTime = (timestamp - lastTime) / 1000 || 0;
-                    lastTime = timestamp;
-
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    nodes.forEach(node => {
-                        node.update(deltaTime);
-                        node.draw();
-                    });
-
-                    for (let i = connections.length - 1; i >= 0; i--) {
-                        const conn = connections[i];
-                        conn.update(deltaTime);
-                        conn.draw();
-                        if (conn.progress >= 1) {
-                            connections.splice(i, 1);
-                        }
-                    }
-
-                    if (connections.length < 50 && Math.random() < 0.1) {
-                        addRandomConnection();
-                    }
-                    
-                    animationFrameId = requestAnimationFrame(animate);
-                };
-
-                init();
-                animate(0);
-
-                window.addEventListener('resize', init);
-
-                return () => {
-                    cancelAnimationFrame(animationFrameId);
-                    window.removeEventListener('resize', init);
-                };
-                */
-                
-                // --- NEW "UNIQUE PATHS" ANIMATION LOGIC ---
-                const canvas = canvasRef.current;
-                const ctx = canvas.getContext('2d');
-                let animationFrameId;
-
                 const cellSize = 25;
-                let gridWidth, gridHeight;
-                let edgeNodes = [];
-                let signals = [];
-                let lastTime = 0;
+                let gridWidth, gridHeight, signals = [], lastTime = 0;
 
                 class Signal {
                     constructor() {
                         const startSide = Math.floor(Math.random() * 4);
                         let endSide = Math.floor(Math.random() * 4);
-                        // Ensure end is on a different wall
-                        while(endSide === startSide) {
-                            endSide = Math.floor(Math.random() * 4);
-                        }
-                        
+                        while (endSide === startSide) { endSide = Math.floor(Math.random() * 4); }
                         this.startNode = this.getRandomNodeOnSide(startSide);
                         this.endNode = this.getRandomNodeOnSide(endSide);
-                        
                         this.path = this.findPath(this.startNode, this.endNode);
                         this.progress = 0;
-                        this.speed = Math.random() * 10 + 5; // cells per second
+                        this.speed = Math.random() * 10 + 5;
                         this.color = `hsl(${Math.random() > 0.5 ? 180 + Math.random() * 20 : 300 + Math.random() * 40}, 100%, 60%)`;
                         this.trailLength = 20;
                     }
-                    
                     getRandomNodeOnSide(side) {
                         let x, y;
-                        switch(side) {
-                            case 0: // top
-                                x = Math.floor(Math.random() * gridWidth); y = 0; break;
-                            case 1: // right
-                                x = gridWidth - 1; y = Math.floor(Math.random() * gridHeight); break;
-                            case 2: // bottom
-                                x = Math.floor(Math.random() * gridWidth); y = gridHeight - 1; break;
-                            case 3: // left
-                                x = 0; y = Math.floor(Math.random() * gridHeight); break;
+                        switch (side) {
+                            case 0: x = Math.floor(Math.random() * gridWidth); y = 0; break;
+                            case 1: x = gridWidth - 1; y = Math.floor(Math.random() * gridHeight); break;
+                            case 2: x = Math.floor(Math.random() * gridWidth); y = gridHeight - 1; break;
+                            case 3: x = 0; y = Math.floor(Math.random() * gridHeight); break;
                         }
-                        return {x, y};
+                        return { x, y };
                     }
-
                     findPath(start, end) {
                         const queue = [[start]];
                         const visited = new Set([`${start.x},${start.y}`]);
-                        
-                        while(queue.length > 0) {
+                        while (queue.length > 0) {
                             const path = queue.shift();
-                            const {x, y} = path[path.length - 1];
-
-                            if(x === end.x && y === end.y) return path;
-
-                            const neighbors = [{x: x+1, y}, {x: x-1, y}, {x, y: y+1}, {x, y: y-1}];
-                            // Shuffle neighbors for randomness
-                            for (let i = neighbors.length - 1; i > 0; i--) {
-                                const j = Math.floor(Math.random() * (i + 1));
-                                [neighbors[i], neighbors[j]] = [neighbors[j], neighbors[i]];
-                            }
-
-                            for(const neighbor of neighbors) {
-                                if(neighbor.x >= 0 && neighbor.x < gridWidth && neighbor.y >= 0 && neighbor.y < gridHeight && !visited.has(`${neighbor.x},${neighbor.y}`)) {
+                            const { x, y } = path[path.length - 1];
+                            if (x === end.x && y === end.y) return path;
+                            const neighbors = [{ x: x + 1, y }, { x: x - 1, y }, { x, y: y + 1 }, { x, y: y - 1 }];
+                            for (let i = neighbors.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[neighbors[i], neighbors[j]] = [neighbors[j], neighbors[i]]; }
+                            for (const neighbor of neighbors) {
+                                if (neighbor.x >= 0 && neighbor.x < gridWidth && neighbor.y >= 0 && neighbor.y < gridHeight && !visited.has(`${neighbor.x},${neighbor.y}`)) {
                                     visited.add(`${neighbor.x},${neighbor.y}`);
                                     const newPath = [...path, neighbor];
                                     queue.push(newPath);
                                 }
                             }
                         }
-                        return []; // No path found
+                        return [];
                     }
-
-                    update(deltaTime) {
-                        this.progress += this.speed * deltaTime;
-                    }
-
+                    update(deltaTime) { this.progress += this.speed * deltaTime; }
                     draw() {
-                        for(let i=0; i < this.path.length; i++) {
+                        if (!this.path) return;
+                        for (let i = 0; i < this.path.length; i++) {
                             const distance = this.progress - i;
-                            if(distance > 0 && distance < this.trailLength) {
+                            if (distance > 0 && distance < this.trailLength) {
                                 const alpha = 1 - (distance / this.trailLength);
-                                const {x, y} = this.path[i];
-                                ctx.fillStyle = `rgba(${parseInt(this.color.slice(4,7))}, ${parseInt(this.color.slice(9,12))}, ${parseInt(this.color.slice(14,17))}, ${alpha})`;
+                                const { x, y } = this.path[i];
+                                ctx.fillStyle = `rgba(${parseInt(this.color.slice(4, 7))}, ${parseInt(this.color.slice(9, 12))}, ${parseInt(this.color.slice(14, 17))}, ${alpha})`;
                                 ctx.beginPath();
-                                ctx.arc(x * cellSize + cellSize/2, y * cellSize + cellSize/2, 1.5, 0, Math.PI * 2);
+                                ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, 1.5, 0, Math.PI * 2);
                                 ctx.fill();
                             }
                         }
-                        
-                         // Glowing head
-                         if(this.progress < this.path.length) {
-                             const headIndex = Math.floor(this.progress);
-                             const p1 = this.path[headIndex];
-                             if(p1) {
-                                 ctx.fillStyle = this.color;
-                                 ctx.shadowColor = this.color;
-                                 ctx.shadowBlur = 10;
-                                 ctx.beginPath();
-                                 ctx.arc(p1.x * cellSize + cellSize/2, p1.y * cellSize + cellSize/2, 2.5, 0, Math.PI*2);
-                                 ctx.fill();
-                                 ctx.shadowBlur = 0;
-                             }
-                         }
+                        if (this.progress < this.path.length) {
+                            const headIndex = Math.floor(this.progress);
+                            const p1 = this.path[headIndex];
+                            if (p1) {
+                                ctx.fillStyle = this.color;
+                                ctx.shadowColor = this.color;
+                                ctx.shadowBlur = 10;
+                                ctx.beginPath();
+                                ctx.arc(p1.x * cellSize + cellSize / 2, p1.y * cellSize + cellSize / 2, 2.5, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.shadowBlur = 0;
+                            }
+                        }
                     }
                 }
-
                 const init = () => {
                     canvas.width = canvas.offsetWidth;
                     canvas.height = canvas.offsetHeight;
@@ -458,101 +297,159 @@
                     gridHeight = Math.floor(canvas.height / cellSize);
                     signals = [];
                 };
-
                 const animate = (timestamp) => {
                     const deltaTime = (timestamp - lastTime) / 1000 || 0;
                     lastTime = timestamp;
-
                     ctx.fillStyle = 'rgba(13, 12, 29, 0.1)';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
                     for (let i = signals.length - 1; i >= 0; i--) {
                         signals[i].update(deltaTime);
                         signals[i].draw();
-                        if (signals[i].progress >= signals[i].path.length) {
+                        if (signals[i].progress >= (signals[i].path?.length || 0)) {
                             signals.splice(i, 1);
                         }
                     }
-
                     if (signals.length < 30 && Math.random() < 0.1) {
                         signals.push(new Signal());
                     }
-                    
                     animationFrameId = requestAnimationFrame(animate);
                 };
-
                 init();
                 animate(0);
-
                 window.addEventListener('resize', init);
-
-                return () => {
-                    cancelAnimationFrame(animationFrameId);
-                    window.removeEventListener('resize', init);
-                };
-
+                return () => { cancelAnimationFrame(animationFrameId); window.removeEventListener('resize', init); };
             }, []);
-
-            return <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 opacity-30"></canvas>
+            return <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 opacity-30"></canvas>;
         };
 
-        // --- GAME: Skills Breaker (Breakout) - UPDATED ---
-        const SkillsBreaker = ({ skills, onGameEnd }) => {
+        const SkillsBreaker = ({ skills, skillState, onPointUpdate, onGameEnd, onActivateAll }) => {
             const canvasRef = useRef(null);
+            const [gameState, setGameState] = useState('ready');
+            const [lives, setLives] = useState(3);
+            const [showTutorial, setShowTutorial] = useState(false);
+            const [floatingTexts, setFloatingTexts] = useState([]);
+            const gameStateRef = useRef(gameState);
+            
+            useEffect(() => {
+                gameStateRef.current = gameState;
+            }, [gameState]);
+
+            const launchBall = useCallback(() => {
+                if (gameStateRef.current === 'ready') {
+                    setGameState('playing');
+                }
+            }, []);
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const handleLaunch = (e) => {
+                    if (e.code === 'Space' || e.type === 'mousedown' || e.type === 'touchstart') {
+                        e.preventDefault();
+                        launchBall();
+                    }
+                };
+                document.addEventListener('keydown', handleLaunch);
+                canvas.addEventListener('mousedown', handleLaunch);
+                canvas.addEventListener('touchstart', handleLaunch);
+                return () => {
+                    document.removeEventListener('keydown', handleLaunch);
+                    canvas.removeEventListener('mousedown', handleLaunch);
+                    canvas.removeEventListener('touchstart', handleLaunch);
+                };
+            }, [launchBall]);
+
             useEffect(() => {
                 const canvas = canvasRef.current;
                 const ctx = canvas.getContext('2d');
                 let animationFrameId;
+                const baseSpeed = { x: 3, y: -3 };
+                let speedMultiplier = 1;
+                const paddle = { x: 0, y: 0, width: 100, height: 12, dx: 0, speed: 8 };
+                const ball = { x: 0, y: 0, radius: 7, dx: baseSpeed.x, dy: baseSpeed.y };
+                const bricks = [];
+                let brickInfo;
 
-                const resizeCanvas = () => {
+                const initGame = (isNewLife = false) => {
                     const container = canvas.parentElement;
                     canvas.width = container.offsetWidth;
-                    canvas.height = container.offsetWidth > 600 ? 400 : container.offsetWidth * 0.7;
-                };
-                
-                let paddle, ball, bricks, brickInfo;
-                
-                const initGame = () => {
-                    resizeCanvas();
-                    paddle = { x: canvas.width / 2 - 50, y: canvas.height - 20, width: 100, height: 10, dx: 0, speed: 7 };
-                    ball = { x: canvas.width / 2, y: canvas.height - 40, radius: 7, dx: (canvas.width / 150), dy: -(canvas.width / 150) };
-                    brickInfo = { width: (canvas.width - 70) / 6, height: 20, padding: 10, offsetTop: 30, offsetLeft: 30 };
-                    bricks = [];
-                    for (let c = 0; c < 6; c++) {
-                        bricks[c] = [];
-                        for (let r = 0; r < 4; r++) {
-                            const skillIndex = (r * 6 + c) % skills.length;
-                            bricks[c][r] = { x: 0, y: 0, status: 1, text: skills[skillIndex] };
+                    canvas.height = Math.min(container.offsetWidth * 0.7, 450);
+                    brickInfo = { rows: 5, cols: 8, width: 0, height: 20, padding: 5, offsetTop: 30, offsetLeft: 5 };
+                    brickInfo.width = (canvas.width - brickInfo.offsetLeft * 2 - brickInfo.padding * (brickInfo.cols - 1)) / brickInfo.cols;
+                    paddle.x = canvas.width / 2 - paddle.width / 2;
+                    paddle.y = canvas.height - 30;
+                    if (!isNewLife) {
+                        bricks.length = 0;
+                        const skillCategories = Object.keys(skills);
+                        for (let c = 0; c < brickInfo.cols; c++) {
+                            bricks[c] = [];
+                            for (let r = 0; r < brickInfo.rows; r++) {
+                                const category = skillCategories[(c + r) % skillCategories.length];
+                                bricks[c][r] = { x: 0, y: 0, status: 1, category, color: skills[category].color };
+                            }
                         }
                     }
+                    resetBall();
                 };
-                
-                initGame();
 
-                function drawBricks() {
-                    let bricksBroken = 0;
-                    bricks.forEach((column, c) => {
-                        column.forEach((brick, r) => {
-                            if (brick.status === 1) {
-                                brick.x = c * (brickInfo.width + brickInfo.padding) + brickInfo.offsetLeft;
-                                brick.y = r * (brickInfo.height + brickInfo.padding) + brickInfo.offsetTop;
-                                ctx.beginPath();
-                                ctx.rect(brick.x, brick.y, brickInfo.width, brickInfo.height);
-                                ctx.fillStyle = `hsl(${ (c * 60 + r * 20) % 360}, 70%, 50%)`;
-                                ctx.fill();
-                                ctx.closePath();
-                                ctx.fillStyle = '#000';
-                                ctx.font = '12px Share Tech Mono';
-                                ctx.fillText(brick.text, brick.x + 5, brick.y + 15);
-                            } else {
-                                bricksBroken++;
+                const resetBall = () => {
+                    setGameState('ready');
+                    speedMultiplier = 1 + (0.2 * (3 - lives));
+                    ball.x = paddle.x + paddle.width / 2;
+                    ball.y = paddle.y - ball.radius;
+                    ball.dx = baseSpeed.x * (Math.random() > 0.5 ? 1 : -1) * speedMultiplier;
+                    ball.dy = baseSpeed.y * speedMultiplier;
+                };
+
+                const addFloatingText = (text, x, y, color) => {
+                    const id = Date.now() + Math.random();
+                    setFloatingTexts(prev => [...prev, { id, text, x, y, color }]);
+                    setTimeout(() => {
+                        setFloatingTexts(prev => prev.filter(ft => ft.id !== id));
+                    }, 1500);
+                };
+
+                function collisionDetection() {
+                    for (let c = 0; c < brickInfo.cols; c++) {
+                        for (let r = 0; r < brickInfo.rows; r++) {
+                            const b = bricks[c][r];
+                            if (b.status === 1) {
+                                if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickInfo.width && ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickInfo.height) {
+                                    ball.dy = -ball.dy;
+                                    b.status = 2;
+                                    setTimeout(() => b.status = 1, 3000);
+                                    speedMultiplier += 0.02;
+                                    const points = Math.floor(Math.random() * 5) + 1;
+                                    const categorySkills = skills[b.category].skills;
+                                    const randomSkill = categorySkills[Math.floor(Math.random() * categorySkills.length)];
+                                    onPointUpdate(randomSkill, points);
+                                    addFloatingText(`+${points} ${randomSkill}`, b.x + brickInfo.width / 2, b.y, b.color);
+                                    return;
+                                }
                             }
-                        });
-                    });
-                    if (bricksBroken === 4 * 6) {
-                        onGameEnd(true); // Win
+                        }
                     }
                 }
+
+                function drawBricks() {
+                    for (let c = 0; c < brickInfo.cols; c++) {
+                        for (let r = 0; r < brickInfo.rows; r++) {
+                            const b = bricks[c][r];
+                            if (b.status > 0) {
+                                b.x = c * (brickInfo.width + brickInfo.padding) + brickInfo.offsetLeft;
+                                b.y = r * (brickInfo.height + brickInfo.padding) + brickInfo.offsetTop;
+                                ctx.beginPath();
+                                ctx.rect(b.x, b.y, brickInfo.width, brickInfo.height);
+                                ctx.fillStyle = b.color;
+                                ctx.globalAlpha = b.status === 1 ? 1 : 0.3;
+                                ctx.fill();
+                                ctx.closePath();
+                                ctx.globalAlpha = 1;
+                            }
+                        }
+                    }
+                }
+                
                 function drawBall() {
                     ctx.beginPath();
                     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -560,6 +457,7 @@
                     ctx.fill();
                     ctx.closePath();
                 }
+
                 function drawPaddle() {
                     ctx.beginPath();
                     ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
@@ -567,63 +465,54 @@
                     ctx.fill();
                     ctx.closePath();
                 }
-                function collisionDetection() {
-                    bricks.forEach(column => column.forEach(brick => {
-                        if (brick.status === 1) {
-                            if (ball.x > brick.x && ball.x < brick.x + brickInfo.width && ball.y > brick.y && ball.y < brick.y + brickInfo.height) {
-                                ball.dy = -ball.dy;
-                                brick.status = 0;
-                            }
-                        }
-                    }));
-                }
 
                 function movePaddle() {
                     paddle.x += paddle.dx;
                     if (paddle.x < 0) paddle.x = 0;
                     if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
                 }
-                
+
                 function moveBall() {
-                    ball.x += ball.dx;
-                    ball.y += ball.dy;
+                    ball.x += ball.dx * speedMultiplier;
+                    ball.y += ball.dy * speedMultiplier;
                     if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) ball.dx = -ball.dx;
                     if (ball.y - ball.radius < 0) ball.dy = -ball.dy;
-
-                    // UPDATED Paddle Collision
-                    if (ball.y + ball.radius > paddle.y && ball.y - ball.radius < paddle.y + paddle.height && ball.x + ball.radius > paddle.x && ball.x - ball.radius < paddle.x + paddle.width) {
-                        if (ball.dy > 0) { // Only trigger bounce if ball is moving down
-                           ball.dy = -ball.dy;
-                           // Add slight angle change based on where it hits the paddle
-                           let collidePoint = ball.x - (paddle.x + paddle.width / 2);
-                           ball.dx = collidePoint * 0.1;
+                    if (ball.y + ball.radius > paddle.y && ball.x + ball.radius > paddle.x && ball.x - ball.radius < paddle.x + paddle.width) {
+                        if (ball.dy > 0) {
+                            ball.dy = -ball.dy;
+                            let deltaX = ball.x - (paddle.x + paddle.width / 2);
+                            ball.dx = Math.max(-8, Math.min(8, deltaX * 0.2));
                         }
-                    } else if (ball.y + ball.radius > canvas.height) { // Ball missed paddle
-                        onGameEnd(false);
+                    } else if (ball.y + ball.radius > canvas.height) {
+                        if (gameStateRef.current === 'playing') {
+                            setLives(prevLives => prevLives - 1);
+                        }
                     }
                 }
-
+                
                 function draw() {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    drawBricks();
-                    drawBall();
-                    drawPaddle();
+                    drawBricks(); drawBall(); drawPaddle();
                 }
-                function update() {
-                    movePaddle();
-                    moveBall();
-                    collisionDetection();
+
+                function gameLoop() {
+                    if (gameStateRef.current === 'playing') {
+                        movePaddle(); moveBall(); collisionDetection();
+                    } else if (gameStateRef.current === 'ready') {
+                       movePaddle();
+                       ball.x = paddle.x + paddle.width / 2;
+                    }
                     draw();
-                    animationFrameId = requestAnimationFrame(update);
+                    animationFrameId = requestAnimationFrame(gameLoop);
                 }
-                update();
-                
+
+                initGame();
                 const keyDownHandler = (e) => {
-                    if(e.key === "Right" || e.key === "ArrowRight" || e.key.toLowerCase() === "d") paddle.dx = paddle.speed;
-                    else if(e.key === "Left" || e.key === "ArrowLeft" || e.key.toLowerCase() === "a") paddle.dx = -paddle.speed;
+                    if (e.key === "Right" || e.key === "ArrowRight" || e.key.toLowerCase() === "d") paddle.dx = paddle.speed;
+                    else if (e.key === "Left" || e.key === "ArrowLeft" || e.key.toLowerCase() === "a") paddle.dx = -paddle.speed;
                 };
                 const keyUpHandler = (e) => {
-                    if(["Right", "ArrowRight", "d", "Left", "ArrowLeft", "a"].includes(e.key) || ["right", "arrowright", "d", "left", "arrowleft", "a"].includes(e.key.toLowerCase())) paddle.dx = 0;
+                    if (["Right", "ArrowRight", "d", "Left", "ArrowLeft", "a"].includes(e.key) || ["right", "arrowright", "d", "left", "arrowleft", "a"].includes(e.key.toLowerCase())) paddle.dx = 0;
                 };
                 const mouseMoveHandler = e => {
                     const relativeX = e.clientX - canvas.getBoundingClientRect().left;
@@ -634,50 +523,65 @@
                     const relativeX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
                     if (relativeX > 0 && relativeX < canvas.width) paddle.x = relativeX - paddle.width / 2;
                 };
-
                 document.addEventListener('keydown', keyDownHandler);
                 document.addEventListener('keyup', keyUpHandler);
                 canvas.addEventListener('mousemove', mouseMoveHandler);
                 canvas.addEventListener('touchmove', touchMoveHandler, { passive: false });
-                window.addEventListener('resize', initGame);
-
+                gameLoop();
                 return () => {
                     cancelAnimationFrame(animationFrameId);
-                    document.removeEventListener('keydown', keyDownHandler); document.removeEventListener('keyup', keyUpHandler);
-                    canvas.removeEventListener('mousemove', mouseMoveHandler); canvas.removeEventListener('touchmove', touchMoveHandler);
-                    window.removeEventListener('resize', initGame);
+                    document.removeEventListener('keydown', keyDownHandler);
+                    document.removeEventListener('keyup', keyUpHandler);
+                    canvas.removeEventListener('mousemove', mouseMoveHandler);
+                    canvas.removeEventListener('touchmove', touchMoveHandler);
                 };
-            }, []);
-            return <canvas ref={canvasRef} className="w-full max-w-3xl mx-auto h-auto bg-black/30 rounded-lg cursor-none"></canvas>;
-        };
+            }, [lives]);
+            
+            useEffect(() => {
+                if (lives <= 0 && gameStateRef.current !== 'gameOver') {
+                    setGameState('gameOver');
+                }
+            }, [lives]);
 
-        // --- Skill Icon Component ---
-        const SkillIcon = ({ name }) => {
-            const icons = {
-                python: 'M12.3 4.5C12.3 4.5 12.3 4.5 12.3 4.5C12.3 4.5 12.3 4.5 12.3 4.5C10.7 4.5 9.4 5.2 8.5 6.4C8.5 6.4 8.5 6.4 8.5 6.4L8.5 6.4C8.5 6.4 8.5 6.4 8.5 6.4C7.8 7.3 7.4 8.5 7.4 9.8C7.4 9.8 7.4 9.8 7.4 9.8C7.4 9.8 7.4 9.8 7.4 9.8C7.4 11.1 7.8 12.2 8.5 13.2C8.5 13.2 8.5 13.2 8.5 13.2L8.5 13.2C8.5 13.2 8.5 13.2 8.5 13.2C9.4 14.3 10.7 15 12 15C12 15 12 15 12 15C12 15 12 15 12 15C13.3 15 14.6 14.3 15.5 13.2C15.5 13.2 15.5 13.2 15.5 13.2L15.5 13.2C15.5 13.2 15.5 13.2 15.5 13.2C16.2 12.2 16.6 11.1 16.6 9.8C16.6 9.8 16.6 9.8 16.6 9.8C16.6 9.8 16.6 9.8 16.6 9.8C16.6 8.5 16.2 7.3 15.5 6.4C15.5 6.4 15.5 6.4 15.5 6.4L15.5 6.4C15.5 6.4 15.5 6.4 15.5 6.4C14.6 5.2 13.3 4.5 12 4.5C12 4.5 12 4.5 12 4.5ZM12 0C5.4 0 0 5.4 0 12C0 18.6 5.4 24 12 24C18.6 24 24 18.6 24 12C24 5.4 18.6 0 12 0Z',
-                'c++': 'M12.188 12.188a2.813 2.813 0 01-2.812-2.813 2.813 2.813 0 012.812-2.812 2.813 2.813 0 012.813 2.812 2.813 2.813 0 01-2.813 2.813zm0-3.75a.938.938 0 100 1.876.938.938 0 000-1.876z M24 12c0-3.83-2.26-7.22-5.62-8.86l-.27-.13-.13.27C16.5 7.15 14.47 9.38 12 9.38S7.5 7.15 6.02 3.28l-.13-.27-.27.13C2.26 4.78 0 8.17 0 12c0 3.83 2.26 7.22 5.62 8.86l.27.13.13-.27C7.5 16.85 9.53 14.62 12 14.62s4.5 2.23 5.98 6.1l.13.27.27-.13C21.74 19.22 24 15.83 24 12zM12 21.19c-2.43 0-4.47-2.23-5.95-6.1l-.13-.27-.27.13c-3.36-1.64-5.62-5.03-5.62-8.86 0-3.83 2.26-7.22 5.62-8.86l.27-.13.13.27C7.53 2.23 9.57 0 12 0s4.47 2.23 5.95 6.1l.13.27.27-.13C21.74 4.78 24 8.17 24 12c0 3.83-2.26 7.22-5.62 8.86l-.27.13-.13-.27c-1.48-3.87-3.52-6.1-5.95-6.1zM12 2.81c-2.43 0-4.47 2.23-5.95 6.1l-.13.27-.27.13C2.29 10.85 0 14.24 0 18c0 3.83 2.26 7.22 5.62 8.86l.27.13.13-.27C7.5 23.15 9.53 20.92 12 20.92s4.5 2.23 5.98 6.1l.13.27.27-.13C21.74 25.22 24 21.83 24 18c0-3.83-2.26-7.22-5.62-8.86l-.27-.13-.13.27c-1.48 3.87-3.52 6.1-5.95 6.1z',
-                r: 'M18.15 13.425h-3.45v-2.7h3.45v2.7zm.825-5.925c0-.45-.3-.75-.825-.75h-3.45V4.05h3.45c.525 0 .825.3.825.75v2.7zM12 2.475C6.15 2.475 1.5 7.125 1.5 12.975S6.15 23.475 12 23.475 22.5 18.825 22.5 12.975S17.85 2.475 12 2.475zm6.975 11.775c0 .6-.45 1.05-1.05 1.05H15v1.2c0 .6-.45 1.05-1.05 1.05h-1.5c-.6 0-1.05-.45-1.05-1.05v-1.2H9.375c-2.325 0-4.2-1.875-4.2-4.2v-2.7c0-2.325 1.875-4.2 4.2-4.2H15c.6 0 1.05.45 1.05 1.05v2.7H15c-.6 0-1.05.45-1.05 1.05v1.2H15c.6 0 1.05.45 1.05 1.05v1.65c0 .6-.45 1.05-1.05 1.05h-3.45v2.7h3.45c.6 0 1.05.45 1.05 1.05v.9c0 .6-.45 1.05-1.05 1.05h-1.5c-.6 0-1.05-.45-1.05-1.05v-.9c0-2.325 1.875-4.2 4.2-4.2h2.775c.6 0 1.05.45 1.05 1.05v1.2z',
-                javascript: 'M0 0h24v24H0V0zm22.034 18.262c.385-1.218.57-2.483.57-3.794s-.185-2.576-.57-3.794H1.966c-.385 1.218-.57 2.483-.57 3.794s.185 2.576.57 3.794h20.068zM2.844 9.125h18.312c-.52-1.52-1.226-2.92-2.09-4.172H4.934a12.356 12.356 0 00-2.09 4.172zm18.312 5.75H2.844c.864 1.252 1.57 2.652 2.09 4.172h14.132c.52-1.52 1.226-2.92 2.09-4.172z',
-                sql: 'M20.25 16.5H3.75V19.5H20.25V16.5ZM20.25 12H3.75V15H20.25V12ZM20.25 7.5H3.75V10.5H20.25V7.5ZM20.25 3H3.75V6H20.25V3ZM12 0C5.373 0 0 1.343 0 3V21C0 22.657 5.373 24 12 24C18.627 24 24 22.657 24 21V3C24 1.343 18.627 0 12 0Z',
-                tensorflow: 'M16.907 2.05l-4.707 8.153L7.5 2.05H2l7.793 13.5L2 21.95h5.5l4.707-8.153L16.907 21.95H22l-7.793-13.5L22 2.05h-5.093z',
-                pytorch: 'M21.052 9.43c-1.332 0-2.12.788-2.12 1.97v1.27c0 1.182.788 1.97 2.12 1.97s2.12-.788 2.12-1.97v-1.27c0-1.182-.788-1.97-2.12-1.97zm0 3.32c-.523 0-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7s.82.3.82.7v1.27c0 .4-.297.7-.82.7zM15.933 9.43c-1.332 0-2.12.788-2.12 1.97v1.27c0 1.182.788 1.97 2.12 1.97s2.12-.788 2.12-1.97v-1.27c0-1.182-.788-1.97-2.12-1.97zm0 3.32c-.523 0-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7s.82.3.82.7v1.27c0 .4-.297.7-.82.7zM2.948 14.72c1.332 0 2.12-.788 2.12-1.97V11.4c0-1.182-.788-1.97-2.12-1.97S.828 10.218.828 11.4v1.35c0 1.182.788 1.97 2.12 1.97zm0-3.32c.523 0 .82.3.82.7v1.27c0 .4-.297.7-.82.7s-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7zM8.067 14.72c1.332 0 2.12-.788 2.12-1.97V11.4c0-1.182-.788-1.97-2.12-1.97s-2.12.788-2.12 1.97v1.35c0 1.182.788 1.97 2.12 1.97zm0-3.32c.523 0 .82.3.82.7v1.27c0 .4-.297.7-.82.7s-.82-.3-.82-.7v-1.27c0-.4.297-.7.82-.7zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm9.052 10c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1zm-5.119 0c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1zM5.067 12c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1zm5.119 0c0 .9-.228 1.6-.684 2.1-.456.5-1.107.75-1.948.75s-1.492-.25-1.948-.75c-.456-.5-.684-1.2-.684-2.1s.228-1.6.684-2.1c.456-.5 1.107-.75 1.948-.75s1.492.25 1.948.75c.456.5.684 1.2.684 2.1z',
-                tableau: 'M6.15 16.2H3V3h3.15v13.2zm5.7 0h-3V8.7h3v7.5zm5.7 0h-3V6.9h3v9.3zM21 3v13.2h-3V3h3zm-5.55-3h-2.1v24h2.1V0zm-5.7 0h-2.1v24h2.1V0zm-5.7 0H2.1v24h2.1V0z',
-                excel: 'M23.71,3.43,18.4,2.15a.79.79,0,0,0-.7.12l-5,3.87-4.43-3.8A.8.8,0,0,0,7.6.79L2.29,2.07A.79.79,0,0,0,1.58,2.8V21.2a.79.79,0,0,0,.71.72l5.31,1.28a.79.79,0,0,0,.7-.12l5-3.87,4.43,3.8a.8.8,0,0,0,.67.13l5.31-1.28A.79.79,0,0,0,24,21.2V4.15A.79.79,0,0,0,23.71,3.43ZM8,21,3,19.6V4.4L8,5.8ZM15,17.1,9.4,21.5,8,21V5.8L9.4,5.5l5.6,4.3ZM22,19.6,17,21V5.8l1.4-.3L22,4.4Z',
-                mongodb: 'M13.31,2.82a10.22,10.22,0,0,0-1.22-1.22,10.22,10.22,0,0,0-1.22,1.22C10.6,3.09,10.51,4,10.51,5v.19a.19.19,0,0,0,.19.19H12a2.2,2.2,0,0,1,2.2,2.2v8.83a2.2,2.2,0,0,1-2.2,2.2H10.7a.19.19,0,0,0-.19.19V19c0,1,.09,1.91.36,2.18a10.22,10.22,0,0,0,1.22,1.22,10.22,10.22,0,0,0,1.22-1.22c.27-.27.36-1.19.36-2.18v-.19a.19.19,0,0,0-.19-.19H12a2.2,2.2,0,0,1-2.2-2.2V7.59a2.2,2.2,0,0,1,2.2-2.2h1.12a.19.19,0,0,0,.19-.19V5C13.67,4,13.58,3.09,13.31,2.82ZM12,0A12,12,0,1,0,24,12,12,12,0,0,0,12,0Z',
-                mysql: 'M18,9.47a7.5,7.5,0,0,0-1.76-4.95,1.5,1.5,0,0,0,0-2.12,1.5,1.5,0,0,0-2.12,0,7.47,7.47,0,0,0-4.24,0,1.5,1.5,0,0,0-2.12,0,1.5,1.5,0,0,0,0,2.12A7.5,7.5,0,0,0,6,9.47v6.22a7.5,7.5,0,0,0-2.12-1.76,1.5,1.5,0,0,0-2.12,0,1.5,1.5,0,0,0,0,2.12,7.5,7.5,0,0,0,4.24,4.24,1.5,1.5,0,0,0,2.12,0,1.5,1.5,0,0,0,0-2.12,7.5,7.5,0,0,0-1.76-2.12V9.47a7.5,7.5,0,0,0,1.76-2.12,1.5,1.5,0,0,0,2.12,0,1.5,1.5,0,0,0,0-2.12,1.5,1.5,0,0,0-2.12,0,7.5,7.5,0,0,0-2.12,4.24h4.24a7.5,7.5,0,0,0-2.12-4.24,1.5,1.5,0,0,0-2.12,0,1.5,1.5,0,0,0,0,2.12,1.5,1.5,0,0,0,2.12,0,7.5,7.5,0,0,0,1.76,2.12v6.22a7.5,7.5,0,0,0-1.76,2.12,1.5,1.5,0,0,0,0,2.12,1.5,1.5,0,0,0,2.12,0,7.5,7.5,0,0,0,4.24-4.24,1.5,1.5,0,0,0,0-2.12,1.5,1.5,0,0,0-2.12,0,7.5,7.5,0,0,0-2.12,1.76V9.47a7.5,7.5,0,0,0,4.95-1.76,1.5,1.5,0,0,0,2.12,0,1.5,1.5,0,0,0,0-2.12,7.5,7.5,0,0,0-4.95-1.76Z',
-                flask: 'M18.66,9.13a.66.66,0,0,0-.91-.19L12,12.33,6.25,8.94a.66.66,0,0,0-.91.19.65.65,0,0,0,.19.9l6.11,3.49a.65.65,0,0,0,.7,0l6.11-3.49A.65.65,0,0,0,18.66,9.13ZM12,1.33A10.67,10.67,0,1,0,22.67,12,10.67,10.67,0,0,0,12,1.33ZM12,21.33a9.33,9.33,0,1,1,9.33-9.33A9.34,9.34,0,0,1,12,21.33Z',
-                react: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-8c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5-2.46 5.5-5.5 5.5-5.5-2.46-5.5-5.5zM12 4.5c-4.14 0-7.5 3.36-7.5 7.5s3.36 7.5 7.5 7.5 7.5-3.36 7.5-7.5-3.36-7.5-7.5-7.5z',
-                git: 'M23.36,10.43,13.57.64a2.1,2.1,0,0,0-3.14,0L.64,10.43a2.1,2.1,0,0,0,0,3.14l9.79,9.79a2.1,2.1,0,0,0,3.14,0l9.79-9.79a2.1,2.1,0,0,0,0-3.14ZM16.5,14.71a1.41,1.41,0,0,1,0-2l2.12-2.12-2.83-2.83L13.67,10a1.4,1.4,0,0,1-2,0L9.49,7.83,6.66,5l2.12-2.12a1.41,1.41,0,0,1,2,0l4.24,4.24a1.41,1.41,0,0,1,0,2L13,11.29l2.12,2.12A1.41,1.41,0,0,1,16.5,14.71Z',
-                docker: 'M23.31,9.65,21.07,9,21,8.37l-1.78-3a.35.35,0,0,0-.3-.17H16.29a.35.35,0,0,0-.3.17L14.21,9,12,9.65l-.57.21V2.62a.35.35,0,0,0-.35-.35H8.35a.35.35,0,0,0-.35.35v7.24l-.57-.21L5.11,9,3.33,5.2a.35.35,0,0,0-.3-.17H.35a.35.35,0,0,0-.3.57L2,9.65,0,15.12a.35.35,0,0,0,.3.57H3a.35.35,0,0,0,.3-.17L5.11,12l2.24.65.57.21V21.5a.35.35,0,0,0,.35.35h4.57a.35.35,0,0,0,.35-.35v-8.64l.57-.21,2.24-.65L18.62,15.5a.35.35,0,0,0,.3.17h2.67a.35.35,0,0,0,.3-.57ZM7.5,11.1a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,7.5,11.1Zm0-3.15A1.05,1.05,0,1,1,8.55,7,1.05,1.05,0,0,1,7.5,7.95Zm3.15,3.15a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,10.65,11.1Zm0-3.15a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,10.65,7.95Zm3.15,3.15a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,13.8,11.1Zm3.15,0a1.05,1.05,0,1,1,1.05-1.05A1.05,1.05,0,0,1,16.95,11.1Z',
-                default: 'M12,2a10,10,0,0,0-9.45,13.32l-1.2,4.8a1,1,0,0,0,1.27,1.27l4.8-1.2A10,10,0,1,0,12,2Zm5.71,9.48a1.5,1.5,0,0,1-1.24,1.24,7.85,7.85,0,0,1-4.47.88,8,8,0,0,1-4.47-.88,1.5,1.5,0,0,1-1.24-1.24A7.85,7.85,0,0,1,6,8.29,8,8,0,0,1,6.88,3.82a1.5,1.5,0,0,1,1.24-1.24,7.85,7.85,0,0,1,4.47-.88,8,8,0,0,1,4.47.88,1.5,1.5,0,0,1,1.24,1.24A7.85,7.85,0,0,1,18,8.29,8,8,0,0,1,17.12,11.48Z',
-            };
-            const iconSvg = icons[name.toLowerCase()] || icons['default'];
             return (
-                <div className="flex flex-col items-center justify-center gap-2 p-4 bg-[var(--bg-medium)] rounded-lg border border-transparent hover:border-[var(--secondary)] transition-all">
-                    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 fill-current text-gray-300">
-                        <path d={iconSvg}/>
-                    </svg>
-                    <span className="font-mono text-sm text-center">{name}</span>
+                <div className="relative max-w-3xl mx-auto">
+                    <div className="absolute top-2 left-2 right-2 flex justify-between items-center z-10">
+                        <button onClick={() => setShowTutorial(true)} className="w-8 h-8 rounded-full bg-black/50 text-white font-bold text-xl hover:bg-black/80 transition-colors">?</button>
+                        <div className="flex items-center gap-2">
+                             {[...Array(Math.max(0, lives))].map((_, i) => <div key={i} className="w-3 h-3 rounded-full bg-[var(--primary)]"></div>)}
+                             {[...Array(Math.max(0, 3 - lives))].map((_, i) => <div key={i} className="w-3 h-3 rounded-full bg-gray-600"></div>)}
+                        </div>
+                    </div>
+                    <canvas ref={canvasRef} className="w-full h-auto bg-black/30 rounded-lg cursor-none"></canvas>
+                    <div className="absolute inset-0 pointer-events-none">
+                        {floatingTexts.map(ft => (
+                             <div key={ft.id} className="absolute floating-text font-mono font-bold" style={{ left: `${ft.x}px`, top: `${ft.y}px`, color: ft.color }}>
+                                {ft.text}
+                            </div>
+                        ))}
+                    </div>
+                    {(gameState === 'gameOver' || gameState === 'win') && (
+                        <div className="absolute inset-0 bg-black/70 flex flex-col justify-center items-center text-center rounded-lg">
+                            <h3 className="text-4xl font-bold text-glow">{gameState === 'win' ? 'ALL SYSTEMS ACTIVATED' : 'GAME OVER'}</h3>
+                            <button onClick={() => { setLives(3); onGameEnd(gameState === 'win'); }} className="mt-4 bg-[var(--secondary)] text-white font-bold px-6 py-3 rounded-md button-glow">Play Again</button>
+                        </div>
+                    )}
+                    {showTutorial && (
+                        <div className="absolute inset-0 bg-black/80 flex flex-col justify-center items-center text-center p-4 rounded-lg z-20">
+                            <h3 className="text-2xl font-bold mb-4">How to Play</h3>
+                            <ul className="space-y-2 mb-4">
+                                <li>- Use **Mouse**, **A/D**, or **Arrow Keys** to move the paddle.</li>
+                                <li>- **Click** or press **Space** to launch the ball.</li>
+                                <li>- Break colored bricks to earn points for skill categories.</li>
+                                <li>- Collect **5 points** for a skill to activate it.</li>
+                                <li>- Activate all skills to win! You have **3 lives**.</li>
+                            </ul>
+                            <button onClick={() => setShowTutorial(false)} className="bg-[var(--primary)] text-white px-4 py-2 rounded">Got it</button>
+                        </div>
+                    )}
+                    <div className="mt-4 text-center">
+                        <button onClick={onActivateAll} className="bg-gray-700 text-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-600">I'm bored now</button>
+                    </div>
                 </div>
             );
         };
@@ -695,10 +599,14 @@
                 linkedin: "https://www.linkedin.com/in/ishan-yadav-jdu8/",
             };
             const skills = {
-                "Languages": ["Python", "C++", "R", "JavaScript", "SQL"],
-                "ML/AI": ["TensorFlow", "PyTorch", "LLMs", "Reinforcement Learning", "Vision Models", "RAG", "Generative Models", "Multimodal Systems"],
-                "Tools & Platforms": ["Tableau", "Excel", "MongoDB", "MySQL", "Qdrant", "Flask", "React", "Git", "Docker"],
+                "Languages": { color: '#e0218a', skills: ["Python", "C++", "R", "JavaScript", "SQL"] },
+                "ML/AI": { color: '#0abdc6', skills: ["TensorFlow", "PyTorch", "LLMs", "Reinforcement Learning", "Vision Models", "RAG", "Generative Models", "Multimodal Systems"] },
+                "Tools & Platforms": { color: '#9333ea', skills: ["Tableau", "Excel", "MongoDB", "MySQL", "Qdrant", "Flask", "React", "Git", "Docker"] },
             };
+            const allSkills = Object.values(skills).flatMap(cat => cat.skills);
+
+            const initialSkillState = allSkills.reduce((acc, skill) => ({...acc, [skill]: { points: 0, activated: false }}), {});
+
             const projects = [
                 {
                     title: "Sustainable Shopper",
@@ -780,19 +688,42 @@
             // --- END PERSONALIZATION ---
 
             const [isGameActive, setGameActive] = useState(false);
-            const [gameResult, setGameResult] = useState(null);
-            const [projectFilter, setProjectFilter] = useState('All');
+            const [skillState, setSkillState] = useState(initialSkillState);
             const [showScrollPrompt, setShowScrollPrompt] = useState(false);
-            
+            const [projectFilter, setProjectFilter] = useState('All');
+
             const jobTypes = ['All', ...new Set(projects.flatMap(p => p.jobTypes))];
             const filteredProjects = projectFilter === 'All' ? projects : projects.filter(p => p.jobTypes.includes(projectFilter));
 
+            const handlePointUpdate = (skill, points) => {
+                setSkillState(prev => {
+                    if (!prev[skill]) return prev;
+                    const newPoints = prev[skill].points + points;
+                    const isActivated = newPoints >= 5;
+                    const newState = { ...prev, [skill]: { points: newPoints, activated: isActivated } };
+                    const allActivated = Object.values(newState).every(s => s.activated);
+                    if (allActivated && isGameActive) {
+                        // The game component will handle its own win state display
+                    }
+                    return newState;
+                });
+            };
+
+            const handleActivateAll = () => {
+                setSkillState(prev => {
+                    const newState = { ...prev };
+                    for (const skill in newState) { newState[skill] = { points: 5, activated: true }; }
+                    return newState;
+                });
+                setGameActive(false);
+            };
+
             const handleGameEnd = (isWin) => {
-                 setGameResult(isWin ? 'ACCESS GRANTED' : 'FIREWALL RE-ENGAGED');
-                 setTimeout(() => {
-                     setGameActive(false);
-                     setGameResult(null);
-                 }, 3000);
+                if (isWin) {
+                    handleActivateAll();
+                } else {
+                    setGameActive(false);
+                }
             };
             
             const navLinks = [
@@ -807,19 +738,17 @@
                 <div>
                     <Header navLinks={navLinks} onAnimationComplete={() => setShowScrollPrompt(true)} />
                     <main>
-                        <section id="home" className="min-h-screen flex items-center relative">
-                             <div className="container mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                        <section id="home" className="min-h-screen flex items-center relative overflow-hidden">
+                             <CircuitBoardAnimation />
+                             <div className="container mx-auto px-6 md:px-10 relative z-10">
                                 <div className="max-w-3xl">
                                     <AnimatedText text={userData.name} />
                                     <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">{userData.title}</h2>
                                     <p className="text-lg text-gray-300 max-w-xl mb-8">{userData.tagline}</p>
                                     <a href="#projects" className="inline-block bg-[var(--secondary)] text-white font-bold px-6 py-3 rounded-md button-glow">View My Work</a>
                                 </div>
-                                <div className="hidden md:block w-full h-80 relative">
-                                    <CircuitBoardAnimation />
-                                </div>
                             </div>
-                            <div className={`absolute bottom-0 left-0 w-full transition-all duration-500 ${showScrollPrompt ? 'bottom-10' : 'bottom-0'}`}>
+                            <div className={`absolute bottom-0 left-0 w-full transition-all duration-500 z-10 ${showScrollPrompt ? 'bottom-10' : 'bottom-0'}`}>
                                 <div className={`transition-all duration-500 ${showScrollPrompt ? 'mb-16' : 'mb-0'}`}>
                                     <div className="ticker-wrap">
                                         <div className="ticker">
@@ -829,8 +758,8 @@
                                     </div>
                                 </div>
                                 <a href="#about" className={`absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-500 transform ${showScrollPrompt ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                                    <span className="font-mono text-sm text-gray-400">Scroll</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 bouncy-arrow">
+                                    <span className="font-mono text-sm text-[var(--secondary)]">Scroll</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--secondary)] bouncy-arrow">
                                         <path d="M12 5v14M19 12l-7 7-7-7"/>
                                     </svg>
                                 </a>
@@ -867,13 +796,34 @@
                             <section id="skills" className="py-24">
                                <h2 className="text-3xl font-bold text-white mb-8">Skillset Matrix</h2>
                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                   {Object.values(skills).flat().map(skill => <SkillIcon key={skill} name={skill} />)}
+                                   {Object.entries(skills).map(([category, data]) => 
+                                        data.skills.map(skill => (
+                                            <div 
+                                                key={skill} 
+                                                className={`flex flex-col items-center justify-center text-center p-4 bg-[var(--bg-medium)] rounded-lg border transition-all duration-300 font-mono text-sm ${skillState[skill].activated ? 'skill-glow' : 'border-transparent'}`}
+                                                style={{'--glow-color': data.color}}
+                                            >
+                                                <span>{skill}</span>
+                                                <div className="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                                                    <div className="h-1.5 rounded-full" style={{ width: `${Math.min(skillState[skill].points / 5 * 100, 100)}%`, backgroundColor: data.color }}></div>
+                                                </div>
+                                            </div>
+                                        ))
+                                   )}
                                </div>
                                <div className="mt-12 text-center">
                                    {!isGameActive ? (
-                                        <button onClick={() => setGameActive(true)} className="bg-[var(--primary)] text-white font-bold px-6 py-3 rounded-md transition-all hover:bg-opacity-80">INITIATE SKILLS DIAGNOSTIC</button>
+                                        <button onClick={() => { setSkillState(initialSkillState); setGameActive(true); }} className="bg-[var(--primary)] text-white font-bold px-8 py-4 rounded-md transition-all hover:bg-opacity-80 text-lg">
+                                            Can you activate them all?
+                                        </button>
                                     ) : (
-                                        <div className="mt-4">{gameResult ? <p className="text-2xl font-bold text-glow">{gameResult}</p> : <SkillsBreaker skills={Object.values(skills).flat()} onGameEnd={handleGameEnd} />}</div>
+                                        <SkillsBreaker 
+                                            skills={skills} 
+                                            skillState={skillState} 
+                                            onPointUpdate={handlePointUpdate}
+                                            onGameEnd={handleGameEnd}
+                                            onActivateAll={handleActivateAll}
+                                        />
                                     )}
                                 </div>
                             </section>
