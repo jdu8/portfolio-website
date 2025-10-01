@@ -77,6 +77,22 @@
         /* Bouncy Arrow Animation */
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
         .bouncy-arrow { animation: bounce 2s infinite; }
+
+        /* Logo Flicker Animation */
+        @keyframes flickerIn {
+          0% { opacity: 0; box-shadow: 0 0 2px var(--primary), inset 0 0 2px var(--primary); }
+          20% { opacity: 0; }
+          25% { opacity: 1; }
+          30% { opacity: 0; box-shadow: 0 0 5px var(--primary), inset 0 0 5px var(--primary);}
+          40% { opacity: 1; }
+          60% { opacity: 1; }
+          62% { opacity: 0; }
+          65% { opacity: 1; box-shadow: none; }
+          100% { opacity: 1; }
+        }
+        .flicker-in {
+            animation: flickerIn 2s ease-in-out forwards;
+        }
     </style>
 </head>
 <body>
@@ -107,6 +123,18 @@
 
             return <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 glitch-hover">{displayText}</h1>;
         };
+
+        // --- Logo Component ---
+        const Logo = ({ size = 'w-12 h-12', isAnimated = false }) => {
+            const textSize = size.includes('52') ? 'text-7xl' : 'text-2xl';
+            return (
+                <a href="#home" className={`${size} rounded-md bg-[var(--bg-medium)] p-1 inline-block flex-shrink-0 ${isAnimated ? 'flicker-in opacity-0' : 'glitch-hover'}`}>
+                    <div className="w-full h-full border-2 border-[var(--primary)] rounded-sm flex items-center justify-center">
+                        <span className={`${textSize} font-bold text-[var(--primary)] font-mono`}>IY</span>
+                    </div>
+                </a>
+            );
+        };
         
         // --- Header Component with Scroll Logic ---
         const Header = ({ navLinks, onAnimationComplete }) => {
@@ -116,9 +144,10 @@
 
             useEffect(() => {
                 const controlNavbar = () => {
-                    if (window.scrollY > lastScrollY.current) { // if scroll down hide the navbar
+                    // updated to hide only after scrolling past a certain point
+                    if (window.scrollY > lastScrollY.current && window.scrollY > 100) { 
                         setShow(false);
-                    } else { // if scroll up show the navbar
+                    } else { 
                         setShow(true);
                     }
                     lastScrollY.current = window.scrollY;
@@ -137,7 +166,8 @@
 
             return (
                 <header className={`fixed top-0 left-0 w-full z-50 bg-[var(--bg-dark)]/80 backdrop-blur-sm transition-transform duration-300 ${show ? 'translate-y-0' : '-translate-y-full'}`}>
-                    <div className="container mx-auto px-6 md:px-10 py-4">
+                    <div className="container mx-auto px-6 md:px-10 py-4 flex justify-between items-center">
+                        <Logo size="w-12 h-12" isAnimated={true} />
                         <nav className={`transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0'} flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2`}>
                             {navLinks.map(link => (
                                 <a key={link.name} href={link.href} className="text-gray-300 hover:text-[var(--primary)] transition-colors text-lg">
@@ -150,6 +180,322 @@
             );
         };
         
+        // --- NEW: Circuit Board Animation ---
+        const CircuitBoardAnimation = () => {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                /*
+                // --- OLD "ABSTRACT PATHS" ANIMATION LOGIC (Commented Out) ---
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let animationFrameId;
+
+                const resizeCanvas = () => {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
+                };
+                
+                const gridSize = 20;
+                const nodes = [];
+                const connections = [];
+
+                class Node {
+                    constructor(x, y) {
+                        this.x = x;
+                        this.y = y;
+                        this.radius = Math.random() * 2 + 1;
+                        this.baseColor = 'rgba(0, 255, 255, 0.3)';
+                        this.glowColor = 'rgba(0, 255, 255, 1)';
+                        this.isActive = false;
+                        this.activationTime = 0;
+                    }
+
+                    draw() {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = this.baseColor;
+                        ctx.fill();
+
+                        if (this.isActive) {
+                            const glowAmount = Math.sin(this.activationTime * Math.PI);
+                            ctx.fillStyle = this.glowColor;
+                            ctx.globalAlpha = glowAmount;
+                            ctx.beginPath();
+                            ctx.arc(this.x, this.y, this.radius + 2, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.globalAlpha = 1;
+                        }
+                    }
+
+                    update(deltaTime) {
+                        if (this.isActive) {
+                            this.activationTime += deltaTime;
+                            if (this.activationTime >= 1) {
+                                this.isActive = false;
+                                this.activationTime = 0;
+                            }
+                        }
+                    }
+                }
+
+                class Connection {
+                    constructor(node1, node2) {
+                        this.node1 = node1;
+                        this.node2 = node2;
+                        this.progress = 0;
+                        this.speed = Math.random() * 0.5 + 0.2;
+                        this.color = 'rgba(224, 33, 138, 0.7)';
+                    }
+
+                    draw() {
+                        const x1 = this.node1.x;
+                        const y1 = this.node1.y;
+                        const x2 = this.node2.x;
+                        const y2 = this.node2.y;
+                        
+                        const currentX = x1 + (x2 - x1) * this.progress;
+                        const currentY = y1 + (y2 - y1) * this.progress;
+
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(currentX, currentY);
+                        ctx.strokeStyle = this.color;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                        
+                        // Glowing head
+                        ctx.beginPath();
+                        ctx.arc(currentX, currentY, 2, 0, Math.PI * 2);
+                        ctx.fillStyle = this.color;
+                        ctx.fill();
+                    }
+
+                    update(deltaTime) {
+                        this.progress += this.speed * deltaTime;
+                        if (this.progress >= 1) {
+                            this.node2.isActive = true;
+                            this.progress = 1; // Mark for removal
+                        }
+                    }
+                }
+
+                const init = () => {
+                    resizeCanvas();
+                    nodes.length = 0;
+                    connections.length = 0;
+                    const cellWidth = canvas.width / gridSize;
+                    const cellHeight = canvas.height / gridSize;
+                    for (let i = 0; i < gridSize; i++) {
+                        for (let j = 0; j < gridSize; j++) {
+                            const x = cellWidth * i + cellWidth / 2 + (Math.random() - 0.5) * 10;
+                            const y = cellHeight * j + cellHeight / 2 + (Math.random() - 0.5) * 10;
+                            nodes.push(new Node(x, y));
+                        }
+                    }
+                };
+
+                const addRandomConnection = () => {
+                    const node1 = nodes[Math.floor(Math.random() * nodes.length)];
+                    let node2 = nodes[Math.floor(Math.random() * nodes.length)];
+                    while(node1 === node2) {
+                         node2 = nodes[Math.floor(Math.random() * nodes.length)];
+                    }
+                    node1.isActive = true;
+                    connections.push(new Connection(node1, node2));
+                };
+
+                let lastTime = 0;
+                const animate = (timestamp) => {
+                    const deltaTime = (timestamp - lastTime) / 1000 || 0;
+                    lastTime = timestamp;
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    nodes.forEach(node => {
+                        node.update(deltaTime);
+                        node.draw();
+                    });
+
+                    for (let i = connections.length - 1; i >= 0; i--) {
+                        const conn = connections[i];
+                        conn.update(deltaTime);
+                        conn.draw();
+                        if (conn.progress >= 1) {
+                            connections.splice(i, 1);
+                        }
+                    }
+
+                    if (connections.length < 50 && Math.random() < 0.1) {
+                        addRandomConnection();
+                    }
+                    
+                    animationFrameId = requestAnimationFrame(animate);
+                };
+
+                init();
+                animate(0);
+
+                window.addEventListener('resize', init);
+
+                return () => {
+                    cancelAnimationFrame(animationFrameId);
+                    window.removeEventListener('resize', init);
+                };
+                */
+                
+                // --- NEW "UNIQUE PATHS" ANIMATION LOGIC ---
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let animationFrameId;
+
+                const cellSize = 25;
+                let gridWidth, gridHeight;
+                let edgeNodes = [];
+                let signals = [];
+                let lastTime = 0;
+
+                class Signal {
+                    constructor() {
+                        const startSide = Math.floor(Math.random() * 4);
+                        let endSide = Math.floor(Math.random() * 4);
+                        // Ensure end is on a different wall
+                        while(endSide === startSide) {
+                            endSide = Math.floor(Math.random() * 4);
+                        }
+                        
+                        this.startNode = this.getRandomNodeOnSide(startSide);
+                        this.endNode = this.getRandomNodeOnSide(endSide);
+                        
+                        this.path = this.findPath(this.startNode, this.endNode);
+                        this.progress = 0;
+                        this.speed = Math.random() * 10 + 5; // cells per second
+                        this.color = `hsl(${Math.random() > 0.5 ? 180 + Math.random() * 20 : 300 + Math.random() * 40}, 100%, 60%)`;
+                        this.trailLength = 20;
+                    }
+                    
+                    getRandomNodeOnSide(side) {
+                        let x, y;
+                        switch(side) {
+                            case 0: // top
+                                x = Math.floor(Math.random() * gridWidth); y = 0; break;
+                            case 1: // right
+                                x = gridWidth - 1; y = Math.floor(Math.random() * gridHeight); break;
+                            case 2: // bottom
+                                x = Math.floor(Math.random() * gridWidth); y = gridHeight - 1; break;
+                            case 3: // left
+                                x = 0; y = Math.floor(Math.random() * gridHeight); break;
+                        }
+                        return {x, y};
+                    }
+
+                    findPath(start, end) {
+                        const queue = [[start]];
+                        const visited = new Set([`${start.x},${start.y}`]);
+                        
+                        while(queue.length > 0) {
+                            const path = queue.shift();
+                            const {x, y} = path[path.length - 1];
+
+                            if(x === end.x && y === end.y) return path;
+
+                            const neighbors = [{x: x+1, y}, {x: x-1, y}, {x, y: y+1}, {x, y: y-1}];
+                            // Shuffle neighbors for randomness
+                            for (let i = neighbors.length - 1; i > 0; i--) {
+                                const j = Math.floor(Math.random() * (i + 1));
+                                [neighbors[i], neighbors[j]] = [neighbors[j], neighbors[i]];
+                            }
+
+                            for(const neighbor of neighbors) {
+                                if(neighbor.x >= 0 && neighbor.x < gridWidth && neighbor.y >= 0 && neighbor.y < gridHeight && !visited.has(`${neighbor.x},${neighbor.y}`)) {
+                                    visited.add(`${neighbor.x},${neighbor.y}`);
+                                    const newPath = [...path, neighbor];
+                                    queue.push(newPath);
+                                }
+                            }
+                        }
+                        return []; // No path found
+                    }
+
+                    update(deltaTime) {
+                        this.progress += this.speed * deltaTime;
+                    }
+
+                    draw() {
+                        for(let i=0; i < this.path.length; i++) {
+                            const distance = this.progress - i;
+                            if(distance > 0 && distance < this.trailLength) {
+                                const alpha = 1 - (distance / this.trailLength);
+                                const {x, y} = this.path[i];
+                                ctx.fillStyle = `rgba(${parseInt(this.color.slice(4,7))}, ${parseInt(this.color.slice(9,12))}, ${parseInt(this.color.slice(14,17))}, ${alpha})`;
+                                ctx.beginPath();
+                                ctx.arc(x * cellSize + cellSize/2, y * cellSize + cellSize/2, 1.5, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
+                        
+                         // Glowing head
+                         if(this.progress < this.path.length) {
+                             const headIndex = Math.floor(this.progress);
+                             const p1 = this.path[headIndex];
+                             if(p1) {
+                                 ctx.fillStyle = this.color;
+                                 ctx.shadowColor = this.color;
+                                 ctx.shadowBlur = 10;
+                                 ctx.beginPath();
+                                 ctx.arc(p1.x * cellSize + cellSize/2, p1.y * cellSize + cellSize/2, 2.5, 0, Math.PI*2);
+                                 ctx.fill();
+                                 ctx.shadowBlur = 0;
+                             }
+                         }
+                    }
+                }
+
+                const init = () => {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
+                    gridWidth = Math.floor(canvas.width / cellSize);
+                    gridHeight = Math.floor(canvas.height / cellSize);
+                    signals = [];
+                };
+
+                const animate = (timestamp) => {
+                    const deltaTime = (timestamp - lastTime) / 1000 || 0;
+                    lastTime = timestamp;
+
+                    ctx.fillStyle = 'rgba(13, 12, 29, 0.1)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    for (let i = signals.length - 1; i >= 0; i--) {
+                        signals[i].update(deltaTime);
+                        signals[i].draw();
+                        if (signals[i].progress >= signals[i].path.length) {
+                            signals.splice(i, 1);
+                        }
+                    }
+
+                    if (signals.length < 30 && Math.random() < 0.1) {
+                        signals.push(new Signal());
+                    }
+                    
+                    animationFrameId = requestAnimationFrame(animate);
+                };
+
+                init();
+                animate(0);
+
+                window.addEventListener('resize', init);
+
+                return () => {
+                    cancelAnimationFrame(animationFrameId);
+                    window.removeEventListener('resize', init);
+                };
+
+            }, []);
+
+            return <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 opacity-30"></canvas>
+        };
+
         // --- GAME: Skills Breaker (Breakout) - UPDATED ---
         const SkillsBreaker = ({ skills, onGameEnd }) => {
             const canvasRef = useRef(null);
@@ -305,7 +651,7 @@
             return <canvas ref={canvasRef} className="w-full max-w-3xl mx-auto h-auto bg-black/30 rounded-lg cursor-none"></canvas>;
         };
 
-        // --- NEW: Skill Icon Component ---
+        // --- Skill Icon Component ---
         const SkillIcon = ({ name }) => {
             const icons = {
                 python: 'M12.3 4.5C12.3 4.5 12.3 4.5 12.3 4.5C12.3 4.5 12.3 4.5 12.3 4.5C10.7 4.5 9.4 5.2 8.5 6.4C8.5 6.4 8.5 6.4 8.5 6.4L8.5 6.4C8.5 6.4 8.5 6.4 8.5 6.4C7.8 7.3 7.4 8.5 7.4 9.8C7.4 9.8 7.4 9.8 7.4 9.8C7.4 9.8 7.4 9.8 7.4 9.8C7.4 11.1 7.8 12.2 8.5 13.2C8.5 13.2 8.5 13.2 8.5 13.2L8.5 13.2C8.5 13.2 8.5 13.2 8.5 13.2C9.4 14.3 10.7 15 12 15C12 15 12 15 12 15C12 15 12 15 12 15C13.3 15 14.6 14.3 15.5 13.2C15.5 13.2 15.5 13.2 15.5 13.2L15.5 13.2C15.5 13.2 15.5 13.2 15.5 13.2C16.2 12.2 16.6 11.1 16.6 9.8C16.6 9.8 16.6 9.8 16.6 9.8C16.6 9.8 16.6 9.8 16.6 9.8C16.6 8.5 16.2 7.3 15.5 6.4C15.5 6.4 15.5 6.4 15.5 6.4L15.5 6.4C15.5 6.4 15.5 6.4 15.5 6.4C14.6 5.2 13.3 4.5 12 4.5C12 4.5 12 4.5 12 4.5ZM12 0C5.4 0 0 5.4 0 12C0 18.6 5.4 24 12 24C18.6 24 24 18.6 24 12C24 5.4 18.6 0 12 0Z',
@@ -460,111 +806,120 @@
             return (
                 <div>
                     <Header navLinks={navLinks} onAnimationComplete={() => setShowScrollPrompt(true)} />
-                    <main className="container mx-auto px-6 md:px-10">
-                         <section id="home" className="min-h-screen flex flex-col justify-center items-start text-left relative">
-                             <div className="max-w-3xl pb-24 sm:pb-0">
-                                <AnimatedText text={userData.name} />
-                                <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">{userData.title}</h2>
-                                <p className="text-lg text-gray-300 max-w-xl mb-8">{userData.tagline}</p>
-                                <a href="#projects" className="inline-block bg-[var(--secondary)] text-white font-bold px-6 py-3 rounded-md button-glow">View My Work</a>
-                            </div>
-                            <div className={`absolute bottom-24 left-1/2 -translate-x-1/2 flex-col items-center gap-2 transition-opacity duration-500 ${showScrollPrompt ? 'opacity-100 flex' : 'opacity-0 hidden'}`}>
-                                <span className="font-mono text-sm text-gray-400">Scroll</span>
-                                <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center pt-2 bouncy-arrow">
-                                    <div className="w-1 h-2 bg-gray-400 rounded-full"></div>
+                    <main>
+                        <section id="home" className="min-h-screen flex items-center relative">
+                             <div className="container mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                                <div className="max-w-3xl">
+                                    <AnimatedText text={userData.name} />
+                                    <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">{userData.title}</h2>
+                                    <p className="text-lg text-gray-300 max-w-xl mb-8">{userData.tagline}</p>
+                                    <a href="#projects" className="inline-block bg-[var(--secondary)] text-white font-bold px-6 py-3 rounded-md button-glow">View My Work</a>
+                                </div>
+                                <div className="hidden md:block w-full h-80 relative">
+                                    <CircuitBoardAnimation />
                                 </div>
                             </div>
-                            <div className="absolute bottom-0 left-0 w-full">
-                                <div className="ticker-wrap"><div className="ticker">{cvHighlights.map((item, i) => <div key={i} className="ticker-item">{item}</div>)}{cvHighlights.map((item, i) => <div key={i+cvHighlights.length} className="ticker-item">{item}</div>)}</div></div>
-                            </div>
-                        </section>
-
-                        <section id="about" className="py-24">
-                           <h2 className="text-3xl font-bold text-white mb-8">About Me</h2>
-                           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
-                                <div className="md:col-span-2 text-lg text-gray-300 space-y-4">
-                                    <p>{userData.bio}</p>
-                                    <p>When not at the keyboard, I'm exploring NYC, hunting for the best coffee, or contributing to open-source projects.</p>
-                                </div>
-                                <div className="flex justify-center">
-                                    <div className="w-52 h-52 rounded-md bg-[var(--bg-medium)] p-2 glitch-hover">
-                                        <div className="w-full h-full border-2 border-[var(--primary)] rounded-sm flex items-center justify-center">
-                                            <img src={`https://placehold.co/200x200/0d0c1d/e0218a?text=${userData.name.split(' ').map(n=>n[0]).join('')}`} alt="Pixel art avatar" className="w-full h-full object-cover"/>
+                            <div className={`absolute bottom-0 left-0 w-full transition-all duration-500 ${showScrollPrompt ? 'bottom-10' : 'bottom-0'}`}>
+                                <div className={`transition-all duration-500 ${showScrollPrompt ? 'mb-16' : 'mb-0'}`}>
+                                    <div className="ticker-wrap">
+                                        <div className="ticker">
+                                            {cvHighlights.map((item, i) => <div key={i} className="ticker-item">{item}</div>)}
+                                            {cvHighlights.map((item, i) => <div key={i+cvHighlights.length} className="ticker-item">{item}</div>)}
                                         </div>
                                     </div>
                                 </div>
+                                <a href="#about" className={`absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-500 transform ${showScrollPrompt ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                                    <span className="font-mono text-sm text-gray-400">Scroll</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 bouncy-arrow">
+                                        <path d="M12 5v14M19 12l-7 7-7-7"/>
+                                    </svg>
+                                </a>
                             </div>
                         </section>
-                        <section id="experience" className="py-24">
-                           <h2 className="text-3xl font-bold text-white mb-12">Career Trajectory</h2>
-                           <div className="max-w-3xl mx-auto">
-                                <div className="relative border-l-2 border-[var(--bg-medium)]">
-                                    {experience.map((job, index) => (
-                                        <div key={index} className="mb-10 ml-6">
-                                            <span className="absolute flex items-center justify-center w-4 h-4 bg-[var(--secondary)] rounded-full -left-2 ring-4 ring-[var(--bg-dark)]"></span>
-                                            <h3 className="flex items-center mb-1 text-xl font-semibold text-white">{job.role} <span className="text-[var(--primary)] text-sm font-medium ml-3">@ {job.company}</span></h3>
-                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-500">{job.date}</time>
-                                            <p className="text-gray-400">{job.description}</p>
+                        <div className="container mx-auto px-6 md:px-10">
+                            <section id="about" className="py-24">
+                               <h2 className="text-3xl font-bold text-white mb-8">About Me</h2>
+                               <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+                                    <div className="md:col-span-2 text-lg text-gray-300 space-y-4">
+                                        <p>{userData.bio}</p>
+                                        <p>When not at the keyboard, I'm exploring NYC, hunting for the best coffee, or contributing to open-source projects.</p>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <Logo size="w-52 h-52"/>
+                                    </div>
+                                </div>
+                            </section>
+                            <section id="experience" className="py-24">
+                               <h2 className="text-3xl font-bold text-white mb-12">Career Trajectory</h2>
+                               <div className="max-w-3xl mx-auto">
+                                    <div className="relative border-l-2 border-[var(--bg-medium)]">
+                                        {experience.map((job, index) => (
+                                            <div key={index} className="mb-10 ml-6">
+                                                <span className="absolute flex items-center justify-center w-4 h-4 bg-[var(--secondary)] rounded-full -left-2 ring-4 ring-[var(--bg-dark)]"></span>
+                                                <h3 className="flex items-center mb-1 text-xl font-semibold text-white">{job.role} <span className="text-[var(--primary)] text-sm font-medium ml-3">@ {job.company}</span></h3>
+                                                <time className="block mb-2 text-sm font-normal leading-none text-gray-500">{job.date}</time>
+                                                <p className="text-gray-400">{job.description}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+                            <section id="skills" className="py-24">
+                               <h2 className="text-3xl font-bold text-white mb-8">Skillset Matrix</h2>
+                               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                   {Object.values(skills).flat().map(skill => <SkillIcon key={skill} name={skill} />)}
+                               </div>
+                               <div className="mt-12 text-center">
+                                   {!isGameActive ? (
+                                        <button onClick={() => setGameActive(true)} className="bg-[var(--primary)] text-white font-bold px-6 py-3 rounded-md transition-all hover:bg-opacity-80">INITIATE SKILLS DIAGNOSTIC</button>
+                                    ) : (
+                                        <div className="mt-4">{gameResult ? <p className="text-2xl font-bold text-glow">{gameResult}</p> : <SkillsBreaker skills={Object.values(skills).flat()} onGameEnd={handleGameEnd} />}</div>
+                                    )}
+                                </div>
+                            </section>
+                            <section id="projects" className="py-24">
+                                <h2 className="text-3xl font-bold text-white mb-8">Featured Projects</h2>
+                                <div className="flex flex-wrap justify-center gap-2 mb-10">
+                                    {jobTypes.map(type => (
+                                        <button 
+                                            key={type} 
+                                            onClick={() => setProjectFilter(type)}
+                                            className={`font-mono px-4 py-2 text-sm rounded-full border transition-colors ${projectFilter === type ? 'bg-[var(--primary)] border-[var(--primary)] text-white' : 'border-gray-600 text-gray-400 hover:bg-gray-700'}`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {filteredProjects.map((project, index) => (
+                                        <div key={project.title} className="bg-[var(--bg-medium)] rounded-lg p-6 flex flex-col justify-between border border-white/10 transition-all duration-300 hover:border-[var(--primary)] hover:scale-105">
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>
+                                                <p className="text-gray-400 mb-4">{project.description}</p>
+                                                <p className="font-mono text-[var(--accent)] text-sm mb-4">
+                                                    {project.insight && `[+] ${project.insight}`}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <ul className="flex flex-wrap gap-2 mb-4">
+                                                    {project.tags.map(tag => <li key={tag} className="bg-gray-700 text-sm px-2 py-1 rounded">{tag}</li>)}
+                                                </ul>
+                                                <div className="flex space-x-4">
+                                                     <a href={userData.github} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[var(--primary)]">GitHub</a>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        </section>
-                        <section id="skills" className="py-24">
-                           <h2 className="text-3xl font-bold text-white mb-8">Skillset Matrix</h2>
-                           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                               {Object.values(skills).flat().map(skill => <SkillIcon key={skill} name={skill} />)}
-                           </div>
-                           <div className="mt-12 text-center">
-                               {!isGameActive ? (
-                                    <button onClick={() => setGameActive(true)} className="bg-[var(--primary)] text-white font-bold px-6 py-3 rounded-md transition-all hover:bg-opacity-80">INITIATE SKILLS DIAGNOSTIC</button>
-                                ) : (
-                                    <div className="mt-4">{gameResult ? <p className="text-2xl font-bold text-glow">{gameResult}</p> : <SkillsBreaker skills={Object.values(skills).flat()} onGameEnd={handleGameEnd} />}</div>
-                                )}
-                            </div>
-                        </section>
-                        <section id="projects" className="py-24">
-                            <h2 className="text-3xl font-bold text-white mb-8">Featured Projects</h2>
-                            <div className="flex flex-wrap justify-center gap-2 mb-10">
-                                {jobTypes.map(type => (
-                                    <button 
-                                        key={type} 
-                                        onClick={() => setProjectFilter(type)}
-                                        className={`font-mono px-4 py-2 text-sm rounded-full border transition-colors ${projectFilter === type ? 'bg-[var(--primary)] border-[var(--primary)] text-white' : 'border-gray-600 text-gray-400 hover:bg-gray-700'}`}
-                                    >
-                                        {type}
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {filteredProjects.map((project, index) => (
-                                    <div key={project.title} className="bg-[var(--bg-medium)] rounded-lg p-6 flex flex-col justify-between border border-white/10 transition-all duration-300 hover:border-[var(--primary)] hover:scale-105">
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>
-                                            <p className="text-gray-400 mb-4">{project.description}</p>
-                                            <p className="font-mono text-[var(--accent)] text-sm mb-4">
-                                                {project.insight && `[+] ${project.insight}`}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <ul className="flex flex-wrap gap-2 mb-4">
-                                                {project.tags.map(tag => <li key={tag} className="bg-gray-700 text-sm px-2 py-1 rounded">{tag}</li>)}
-                                            </ul>
-                                            <div className="flex space-x-4">
-                                                 <a href={userData.github} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[var(--primary)]">GitHub</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                        <section id="contact" className="py-24 text-center">
-                            <h2 className="text-3xl font-bold text-white mb-4">Get In Touch</h2>
-                            <p className="text-lg text-gray-400 max-w-xl mx-auto mb-8">
-                                I'm actively seeking new opportunities and collaborations. My inbox is always open, whether you have a question or just want to connect.
-                            </p>
-                            <a href={`mailto:${userData.email}`} className="inline-block bg-[var(--secondary)] text-white font-bold px-8 py-4 rounded-md button-glow">Say Hello</a>
-                        </section>
+                            </section>
+                            <section id="contact" className="py-24 text-center">
+                                <h2 className="text-3xl font-bold text-white mb-4">Get In Touch</h2>
+                                <p className="text-lg text-gray-400 max-w-xl mx-auto mb-8">
+                                    I'm actively seeking new opportunities and collaborations. My inbox is always open, whether you have a question or just want to connect.
+                                </p>
+                                <a href={`mailto:${userData.email}`} className="inline-block bg-[var(--secondary)] text-white font-bold px-8 py-4 rounded-md button-glow">Say Hello</a>
+                            </section>
+                        </div>
                     </main>
                     <footer className="text-center py-6 text-gray-500">
                         <div className="flex justify-center space-x-6 mb-4">
