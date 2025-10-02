@@ -1,0 +1,30 @@
+// User data configuration
+const userData = {
+    name: "Ishan Yadav",
+    title: "M.S. Computer Science @ NYU",
+    tagline: "Building intelligent systems with a foundation in multimodal and generative AI.",
+    bio: "As a Master's student at NYU's Courant Institute, I'm immersed in the world of machine learning, data science, and scalable software. My passion lies in transforming raw data into actionable insights and building robust applications that solve real-world problems. With experience in generative models, computer vision, and full-stack development, I thrive in collaborative environments and am driven by a curiosity to learn and innovate.",
+    email: "iy2159@nyu.edu",
+    github: "https://github.com/jdu8",
+    linkedin: "https://www.linkedin.com/in/ishan-yadav-jdu8/",
+};
+
+// CV highlights for ticker
+const cvHighlights = [
+    "M.S. in Computer Science @ NYU", 
+    "Specializing in LLMs & Generative AI", 
+    "Intern @ Samsung", 
+    "Developed RAG Chatbot with fine-tuned LLaMA",
+    "60% Mean Average Precision improvement in DCASE challenge",
+    "Contact: iy2159@nyu.edu"
+];
+
+// Navigation links
+const navLinks = [
+    { name: "About", href: "#about"},
+    { name: "Experience", href: "#experience"},
+    { name: "Skills", href: "#skills"},
+    { name: "Projects", href: "#projects"},
+    { name: "Contact", href: "#contact"},
+];
+

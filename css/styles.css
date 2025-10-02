@@ -1,0 +1,122 @@
+:root {
+    --bg-dark: #0d0c1d;
+    --bg-medium: #1a1a2e;
+    --primary: #e0218a; /* Neon Magenta */
+    --secondary: #0abdc6; /* Electric Blue */
+    --accent: #9333ea; /* Violet */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: #e0e0e0;
+    overflow-x: hidden;
+}
+
+/* CRT Scanline Effect */
+body::after {
+    content: ' ';
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.3;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Share Tech Mono', monospace;
+    transition: all 0.8s ease-in-out;
+}
+
+.section-glow {
+    text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+    color: var(--primary) !important;
+    transition: all 0.8s ease-in-out;
+}
+
+.button-glow {
+    box-shadow: 0 0 5px var(--secondary), 0 0 10px var(--secondary), inset 0 0 5px var(--secondary);
+    transition: all 0.3s ease;
+}
+
+.button-glow:hover {
+    box-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), inset 0 0 10px var(--secondary);
+}
+
+.glitch-hover:hover { 
+    animation: glitch 0.3s linear; 
+}
+
+/* News Ticker Animation */
+.ticker-wrap { 
+    width: 100%; 
+    overflow: hidden; 
+    background-color: rgba(0,0,0,0.2); 
+    padding: 10px 0; 
+    border-top: 1px solid var(--secondary); 
+    border-bottom: 1px solid var(--secondary); 
+    animation: slideUpFromBottom 1s ease-out 2s forwards;
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.ticker { 
+    display: inline-block; 
+    white-space: nowrap; 
+    padding-left: 100%; 
+    animation: ticker 30s linear infinite; 
+    cursor: pointer;
+}
+
+.ticker-paused {
+    animation-play-state: paused;
+}
+
+.ticker-item { 
+    display: inline-block; 
+    padding: 0 2rem; 
+    color: var(--secondary); 
+    transition: all 0.3s ease;
+}
+
+.ticker-item-highlighted {
+    color: var(--primary) !important;
+    text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+    transform: scale(1.1);
+}
+
+/* Hamburger Menu Styles */
+.hamburger-line {
+    transition: all 0.3s ease-in-out;
+}
+
+.hamburger-active .top-line {
+    transform: rotate(45deg) translate(5px, 6px);
+}
+
+.hamburger-active .middle-line {
+    opacity: 0;
+}
+
+.hamburger-active .bottom-line {
+    transform: rotate(-45deg) translate(5px, -6px);
+}
+
+/* Skill Glow Effect */
+.skill-glow {
+    box-shadow: 0 0 8px var(--glow-color), 0 0 12px var(--glow-color), inset 0 0 6px var(--glow-color);
+    border-color: var(--glow-color);
+}
+
+/* Floating Score Text */
+.floating-text {
+    animation: float-up 1.5s ease-out forwards;
+    text-shadow: 0px 0px 3px #000, 0px 0px 3px #000, 0px 0px 3px #000;
+}
+
