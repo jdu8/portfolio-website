@@ -7,9 +7,9 @@
     100% { transform: translate(0); }
 }
 
-@keyframes ticker { 
-    0% { transform: translateX(0); } 
-    100% { transform: translateX(-100%); } 
+@keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-33.333%); }
 }
 
 @keyframes slideUpFromBottom {

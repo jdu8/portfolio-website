@@ -49,7 +49,7 @@ const InteractiveTicker = ({ items }) => {
 
     return (
         <div className="ticker-wrap">
-            <div 
+            <div
                 ref={tickerRef}
                 className={`ticker ${isHovered ? 'ticker-paused' : ''}`}
                 onMouseMove={handleMouseMove}
@@ -57,8 +57,8 @@ const InteractiveTicker = ({ items }) => {
                 onMouseLeave={handleMouseLeave}
             >
                 {items.map((item, i) => (
-                    <div 
-                        key={i} 
+                    <div
+                        key={i}
                         ref={el => itemRefs.current[i] = el}
                         className={`ticker-item ${hoveredIndex === i ? 'ticker-item-highlighted' : ''}`}
                     >
@@ -66,10 +66,18 @@ const InteractiveTicker = ({ items }) => {
                     </div>
                 ))}
                 {items.map((item, i) => (
-                    <div 
-                        key={i + items.length} 
+                    <div
+                        key={`dup-${i}`}
                         ref={el => itemRefs.current[i + items.length] = el}
                         className={`ticker-item ${hoveredIndex === (i + items.length) ? 'ticker-item-highlighted' : ''}`}
+                    >
+                        {item}
+                    </div>
+                ))}
+                {items.map((item, i) => (
+                    <div
+                        key={`dup2-${i}`}
+                        className={`ticker-item ${hoveredIndex === (i + items.length * 2) ? 'ticker-item-highlighted' : ''}`}
                     >
                         {item}
                     </div>
