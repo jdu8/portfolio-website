@@ -13,7 +13,7 @@ const skillIcons = {
     "Hugging Face": "icons/huggingface.svg",
     "LangChain": "icons/langchain.svg",
     "OpenCV": "icons/opencv.svg",
-    "Numpy": "icons/numpy.svg",
+    "NumPy": "icons/numpy.svg",
 
     // Web Development
     "Node.js": "icons/nodejs.svg",
