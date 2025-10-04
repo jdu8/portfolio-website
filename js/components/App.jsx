@@ -141,42 +141,51 @@ function App() {
             <main className="relative z-10">
                 <section id="home" className="min-h-screen flex items-center relative overflow-hidden">
                      <div className="container mx-auto px-6 md:px-10 relative z-10">
-                        <div className="max-w-3xl">
-                            <AnimatedText text={userData.name} />
-                            <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">{userData.title}</h2>
-                            <p className="text-lg text-gray-300 max-w-xl mb-8">{userData.tagline}</p>
-                            <div className="flex gap-4">
-                                <a
-                                    href={`#${navSections[currentNavIndex].toLowerCase()}`}
-                                    className="relative inline-block border-2 border-[var(--secondary)] text-[var(--secondary)] font-bold px-6 py-3 rounded-md hover:bg-[var(--secondary)]/10 transition-all duration-300 overflow-hidden"
-                                    style={{
-                                        boxShadow: '0 0 5px var(--secondary), inset 0 0 5px var(--secondary)',
-                                        textShadow: '0 0 5px var(--secondary)'
-                                    }}
-                                >
-                                    <span className="cycling-text-container">
-                                        {navSections.map((section, index) => (
-                                            <span
-                                                key={section}
-                                                className={`cycling-text ${index === currentNavIndex ? 'cycling-text-active' : ''}`}
-                                            >
-                                                {section}
-                                            </span>
-                                        ))}
-                                    </span>
-                                </a>
-                                <a
-                                    href="YOUR_CV_LINK_HERE"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-block border-2 border-[var(--primary)] text-[var(--primary)] font-bold px-6 py-3 rounded-md hover:bg-[var(--primary)]/10 transition-all duration-300"
-                                    style={{
-                                        boxShadow: '0 0 5px var(--primary), inset 0 0 5px var(--primary)',
-                                        textShadow: '0 0 5px var(--primary)'
-                                    }}
-                                >
-                                    Download CV
-                                </a>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                            <div className="max-w-3xl">
+                                <AnimatedText text={userData.name} />
+                                <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">{userData.title}</h2>
+                                <p className="text-lg text-gray-300 max-w-xl mb-8">{userData.tagline}</p>
+                                <div className="flex gap-4">
+                                    <a
+                                        href={`#${navSections[currentNavIndex].toLowerCase()}`}
+                                        className="relative inline-block border-2 border-[var(--secondary)] text-[var(--secondary)] font-bold px-6 py-3 rounded-md hover:bg-[var(--secondary)]/10 transition-all duration-300 overflow-hidden"
+                                        style={{
+                                            boxShadow: '0 0 5px var(--secondary), inset 0 0 5px var(--secondary)',
+                                            textShadow: '0 0 5px var(--secondary)'
+                                        }}
+                                    >
+                                        <span className="cycling-text-container">
+                                            {navSections.map((section, index) => (
+                                                <span
+                                                    key={section}
+                                                    className={`cycling-text ${index === currentNavIndex ? 'cycling-text-active' : ''}`}
+                                                >
+                                                    {section}
+                                                </span>
+                                            ))}
+                                        </span>
+                                    </a>
+                                    <a
+                                        href="https://drive.google.com/file/d/1GK7wQ9Vd4anf2bOLFZLN5bSQtasSSnc6/view?usp=sharing"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-block border-2 border-[var(--primary)] text-[var(--primary)] font-bold px-6 py-3 rounded-md hover:bg-[var(--primary)]/10 transition-all duration-300"
+                                        style={{
+                                            boxShadow: '0 0 5px var(--primary), inset 0 0 5px var(--primary)',
+                                            textShadow: '0 0 5px var(--primary)'
+                                        }}
+                                    >
+                                        Download CV
+                                    </a>
+                                </div>
+                            </div>
+                            <div className="hidden lg:flex justify-center items-center">
+                                <img
+                                    src="assets/hero-image.png"
+                                    alt="Ishan Yadav"
+                                    className="w-80 h-80 object-contain animate-float hero-image-entrance"
+                                />
                             </div>
                         </div>
                     </div>

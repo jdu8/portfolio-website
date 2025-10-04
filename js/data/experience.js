@@ -3,7 +3,7 @@ const experience = [
     {
         role: "Research Analyst",
         company: "New York University",
-        date: "Sep 2024 - Present",
+        date: "Sep 2025 - Present",
         headline: "Building data infrastructure and dashboards for the Office of the Provost, working with Tableau, ETL pipelines, and LLMs for data processing and analysis.",
         details: []
     },

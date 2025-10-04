@@ -6,7 +6,7 @@ const userData = {
     bio: "As a Master's student at NYU's Courant Institute, I'm immersed in the world of machine learning, data science, and scalable software. My passion lies in transforming raw data into actionable insights and building robust applications that solve real-world problems. With experience in generative models, computer vision, and full-stack development, I thrive in collaborative environments and am driven by a curiosity to learn and innovate.",
     email: "iy2159@nyu.edu",
     github: "https://github.com/jdu8",
-    linkedin: "https://www.linkedin.com/in/ishan-yadav-jdu8/",
+    linkedin: "https://www.linkedin.com/in/ishan-yadav-/",
 };
 
 // CV highlights for ticker
