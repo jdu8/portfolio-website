@@ -144,7 +144,7 @@ function App() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                             <div className="max-w-3xl">
                                 <AnimatedText text={userData.name} />
-                                <h2 className="text-2xl md:text-4xl font-bold text-glow mb-6">{userData.title}</h2>
+                                <h2 className="text-2xl md:text-4xl font-bold mb-6 hero-title-glow">{userData.title}</h2>
                                 <p className="text-lg text-gray-300 max-w-xl mb-8">{userData.tagline}</p>
                                 <div className="flex gap-4">
                                     <a
@@ -207,7 +207,7 @@ function App() {
                        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
                             <div className="md:col-span-2 text-lg text-gray-300 space-y-4">
                                 <p>{userData.bio}</p>
-                                <p>When not at the keyboard, I'm exploring NYC, hunting for the best coffee, or contributing to open-source projects.</p>
+                                <p>When not at the keyboard, I'm exploring NYC, volunteering at Sean Casey Animal Rescue and New York Cares, or hunting for the best coffee.</p>
                             </div>
                             <div className="flex justify-center">
                                 <Logo size="w-52 h-52"/>

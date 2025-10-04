@@ -35,9 +35,53 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .section-glow {
-    text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+    text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
     color: var(--primary) !important;
     transition: all 0.8s ease-in-out;
+}
+
+/* Reduce glow on mobile for better readability */
+@media (max-width: 768px) {
+    .section-glow {
+        text-shadow: 0 0 3px var(--primary), 0 0 6px var(--primary);
+    }
+}
+
+/* Hero Title Glow Effect */
+.hero-title-glow {
+    color: var(--secondary);
+    text-shadow:
+        0 0 10px var(--secondary),
+        0 0 20px var(--secondary),
+        0 0 30px var(--secondary),
+        0 0 40px rgba(10, 189, 198, 0.5);
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        text-shadow:
+            0 0 10px var(--secondary),
+            0 0 20px var(--secondary),
+            0 0 30px var(--secondary),
+            0 0 40px rgba(10, 189, 198, 0.5);
+    }
+    50% {
+        text-shadow:
+            0 0 15px var(--secondary),
+            0 0 30px var(--secondary),
+            0 0 45px var(--secondary),
+            0 0 60px rgba(10, 189, 198, 0.7);
+    }
+}
+
+/* Name Border Glow Effect - Pink/Magenta */
+.name-glow {
+    -webkit-text-stroke: 1px var(--primary);
+    text-shadow:
+        0 0 10px var(--primary),
+        0 0 20px var(--primary),
+        0 0 30px rgba(224, 33, 138, 0.5);
 }
 
 .button-glow {
