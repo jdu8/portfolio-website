@@ -18,6 +18,6 @@ const AnimatedText = ({ text }) => {
         return () => clearInterval(interval);
     }, [targetText]);
     
-    return <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 glitch-hover name-glow">{displayText}</h1>;
+    return <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 glitch-hover name-glow" style={{fontFamily: "'Exo 2', sans-serif"}}>{displayText}</h1>;
 };
 

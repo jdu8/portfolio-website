@@ -7,7 +7,7 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Exo 2', sans-serif;
     background-color: var(--bg-dark);
     color: #e0e0e0;
     overflow-x: hidden;
@@ -30,7 +30,7 @@ body::after {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Orbitron', sans-serif;
     transition: all 0.8s ease-in-out;
 }
 
