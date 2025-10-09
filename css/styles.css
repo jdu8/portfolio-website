@@ -169,33 +169,57 @@ h1, h2, h3, h4, h5, h6 {
             0 0 20px var(--glow-color),
             0 0 30px var(--glow-color),
             inset 0 0 10px var(--glow-color);
-        filter: hue-rotate(0deg) brightness(1);
+        filter: hue-rotate(0deg);
+    }
+    25% {
+        box-shadow:
+            0 0 30px var(--glow-color),
+            0 0 45px var(--glow-color),
+            inset 0 0 15px var(--glow-color);
+        filter: hue-rotate(15deg);
     }
     50% {
         box-shadow:
-            0 0 30px var(--glow-color),
-            0 0 50px var(--glow-color),
+            0 0 35px var(--glow-color),
+            0 0 55px var(--glow-color),
             inset 0 0 20px var(--glow-color);
-        filter: hue-rotate(20deg) brightness(1.2);
+        filter: hue-rotate(30deg);
+    }
+    75% {
+        box-shadow:
+            0 0 30px var(--glow-color),
+            0 0 45px var(--glow-color),
+            inset 0 0 15px var(--glow-color);
+        filter: hue-rotate(15deg);
     }
     100% {
         box-shadow:
             0 0 20px var(--glow-color),
             0 0 30px var(--glow-color),
             inset 0 0 10px var(--glow-color);
-        filter: hue-rotate(0deg) brightness(1);
+        filter: hue-rotate(0deg);
+    }
+}
+
+@keyframes icon-pulse {
+    0%, 100% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.30);
+        opacity: 1;
     }
 }
 
 .group-activated {
-    animation: rotating-glow 2s ease-in-out infinite !important;
+    animation: rotating-glow 2s ease-in-out infinite;
     border-color: var(--glow-color) !important;
-    box-shadow: 0 0 20px var(--glow-color), 0 0 30px var(--glow-color), inset 0 0 10px var(--glow-color) !important;
 }
 
 .group-activated-icon {
-    filter: brightness(1.3) drop-shadow(0 0 15px var(--glow-color)) saturate(1.2) !important;
-    transform: scale(1.25) !important;
+    animation: icon-pulse 2s ease-in-out infinite;
+    transform-origin: center;
 }
 
 /* Cycling Text Animation */

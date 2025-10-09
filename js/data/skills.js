@@ -5,7 +5,7 @@ const skills = {
     "Web & DevOps": { color: '#9333ea', skills: ["Flask", "React", "Node.js", "Docker", "Git", "REST API"] },
     "Data & Cloud": { color: '#f59e0b', skills: ["MongoDB", "MySQL", "PostgreSQL", "Qdrant", "AWS", "Google Cloud"] },
     "Visualization": { color: '#10b981', skills: ["Tableau", "Excel", "Matplotlib", "Seaborn"] },
-    "Robotics": { color: '#22d3ee', skills: ["ROS", "Arduino", "Raspberry Pi"] },
+    "Robotics": { color: '#ef4444', skills: ["ROS", "Arduino", "Raspberry Pi"] },
 };
 
 // Get all skills for game initialization

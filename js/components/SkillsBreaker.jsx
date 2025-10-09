@@ -253,10 +253,27 @@ const SkillsBreaker = ({ skills, skillState, onPointUpdate, onGameEnd, onActivat
         function moveBall() {
             ball.x += ball.dx * speedMultiplier;
             ball.y += ball.dy * speedMultiplier;
-            if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) ball.dx = -ball.dx;
-            if (ball.y - ball.radius < 0) ball.dy = -ball.dy;
+
+            // Wall collision detection with position correction to prevent sticking
+            if (ball.x + ball.radius > canvas.width) {
+                ball.x = canvas.width - ball.radius;
+                ball.dx = -Math.abs(ball.dx); // Force negative direction
+            }
+            if (ball.x - ball.radius < 0) {
+                ball.x = ball.radius;
+                ball.dx = Math.abs(ball.dx); // Force positive direction
+            }
+
+            // Top wall collision
+            if (ball.y - ball.radius < 0) {
+                ball.y = ball.radius;
+                ball.dy = Math.abs(ball.dy); // Force downward
+            }
+
+            // Paddle collision with position correction
             if (ball.y + ball.radius > paddle.y && ball.x + ball.radius > paddle.x && ball.x - ball.radius < paddle.x + paddle.width) {
                 if (ball.dy > 0) {
+                    ball.y = paddle.y - ball.radius; // Prevent ball from going below paddle
                     ball.dy = -ball.dy;
                     let deltaX = ball.x - (paddle.x + paddle.width / 2);
                     ball.dx = Math.max(-8, Math.min(8, deltaX * 0.2));

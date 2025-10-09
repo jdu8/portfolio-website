@@ -195,7 +195,7 @@ function App() {
                         </div>
                         <a href="#about" className={`absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-500 transform ${showScrollPrompt ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                             <span className="font-mono text-sm text-[var(--secondary)]">Scroll</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--secondary)] bouncy-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--secondary)] bouncy-arrow">
                                 <path d="M12 5v14M19 12l-7 7-7-7"/>
                             </svg>
                         </a>
@@ -315,25 +315,57 @@ function App() {
                        <div className={`grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-w-4xl mx-auto ${isResetting ? 'reset-animation' : ''}`}>
                            {Object.entries(skills).map(([category, data]) => {
                                 const categoryFullyActivated = data.skills.every(skill => skillState[skill]?.activated);
-                                return data.skills.map(skill => (
+
+                                // DEBUG LOGGING
+                                if (categoryFullyActivated) {
+                                    console.log(`🔥 Category "${category}" is FULLY ACTIVATED!`);
+                                    console.log(`Skills in ${category}:`, data.skills);
+                                    data.skills.forEach(skill => {
+                                        console.log(`  - ${skill}: points=${skillState[skill]?.points}, activated=${skillState[skill]?.activated}`);
+                                    });
+                                }
+
+                                return data.skills.map(skill => {
+                                    const skillPoints = skillState[skill]?.points || 0;
+                                    const skillActivated = skillState[skill]?.activated || false;
+
+                                    // DEBUG: Log each skill's state
+                                    if (skillActivated) {
+                                        console.log(`✅ Skill "${skill}" is activated (points: ${skillPoints}, category: ${category}, categoryFullyActivated: ${categoryFullyActivated})`);
+                                    }
+
+                                    // DEBUG: Log CSS classes being applied
+                                    const boxClasses = categoryFullyActivated ? 'group-activated' : (skillPoints >= 1 ? 'skill-glow' : 'border-transparent');
+                                    const iconClasses = categoryFullyActivated ? 'group-activated-icon' : '';
+
+                                    if (skillActivated) {
+                                        console.log(`🎨 CSS for "${skill}": box="${boxClasses}", icon="${iconClasses}"`);
+                                        console.log(`   Border color: ${skillPoints >= 1 ? data.color : 'transparent'}`);
+                                        console.log(`   Filter: ${skillPoints >= 1 ? `brightness(${0.7 + (skillPoints / 5) * 0.6}) drop-shadow(0 0 ${skillPoints * 3}px ${data.color}) saturate(${1 + skillPoints / 10})` : 'brightness(1.2) saturate(0.5) contrast(1.1)'}`);
+                                    }
+
+                                    return (
                                     <div
                                         key={skill}
-                                        className={`aspect-square flex flex-col items-center justify-center text-center p-3 bg-[var(--bg-medium)] rounded-lg border font-mono text-sm relative group ${skillState[skill]?.points >= 1 ? 'skill-glow' : 'border-transparent'}`}
+                                        className={`aspect-square flex flex-col items-center justify-center text-center p-3 bg-[var(--bg-medium)] rounded-lg border font-mono text-sm relative group ${boxClasses}`}
                                         style={{
                                             '--glow-color': data.color,
-                                            borderColor: skillState[skill]?.points >= 1 ? data.color : 'transparent',
+                                            borderColor: skillPoints >= 1 ? data.color : 'transparent',
                                             transition: 'all 0.3s'
                                         }}
                                     >
                                         <img
                                             src={skillIcons[skill]}
                                             alt={skill}
-                                            className="w-10 h-10 transition-all duration-300"
+                                            className={`w-10 h-10 transition-all duration-300 ${iconClasses}`}
                                             style={{
-                                                filter: skillState[skill]?.points >= 1
-                                                    ? `brightness(${0.7 + (skillState[skill].points / 5) * 0.6}) drop-shadow(0 0 ${skillState[skill].points * 3}px ${data.color}) saturate(${1 + skillState[skill].points / 10})`
+                                                filter: skillPoints >= 1
+                                                    ? `brightness(${0.7 + (skillPoints / 5) * 0.6}) drop-shadow(0 0 ${skillPoints * 3}px ${data.color}) saturate(${1 + skillPoints / 10})`
                                                     : 'brightness(1.2) saturate(0.5) contrast(1.1)',
-                                                transform: skillState[skill]?.points >= 1 ? `scale(${1 + skillState[skill].points / 20})` : 'scale(1)'
+                                                transform: categoryFullyActivated
+                                                    ? undefined // Let CSS animation handle transform for activated groups
+                                                    : (skillPoints >= 1 ? `scale(${1 + skillPoints / 20})` : 'scale(1)'),
+                                                willChange: categoryFullyActivated ? 'transform' : 'auto'
                                             }}
                                         />
                                         <div
@@ -348,7 +380,8 @@ function App() {
                                             {skill}
                                         </div>
                                     </div>
-                                ));
+                                );
+                                });
                            })}
                        </div>
                        <div className="mt-12 text-center">
