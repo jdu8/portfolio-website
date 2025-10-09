@@ -11,12 +11,14 @@ const userData = {
 
 // CV highlights for ticker
 const cvHighlights = [
-    "M.S. in Computer Science @ NYU", 
-    "Specializing in LLMs & Generative AI", 
-    "Intern @ Samsung", 
-    "Developed RAG Chatbot with fine-tuned LLaMA",
-    "60% Mean Average Precision improvement in DCASE challenge",
-    "Contact: iy2159@nyu.edu"
+    "Winner NASA x NYU Hackathon!",
+    "Currently Building next-gen Data Systems @ NYU",
+    "Previously Shipped ML models @ Samsung",
+    "Achieved 60% accuracy improvement in Audio Retrieval",
+    "Multimodal AI Systems, Data Processing, Backend Development",
+    "Looking for collaborators and food truck recommendations",
+    "HMU @ iy2159@nyu.edu",
+    "Always avoiding my veggies"
 ];
 
 // Navigation links

@@ -47,6 +47,24 @@ const InteractiveTicker = ({ items }) => {
         setHoveredIndex(-1);
     };
 
+    // Function to render item with email link if it contains email
+    const renderItem = (item) => {
+        const emailMatch = item.match(/iy2159@nyu\.edu/);
+        if (emailMatch) {
+            const parts = item.split(emailMatch[0]);
+            return (
+                <>
+                    {parts[0]}
+                    <a href="mailto:iy2159@nyu.edu" className="hover:text-[var(--primary)] transition-colors">
+                        {emailMatch[0]}
+                    </a>
+                    {parts[1]}
+                </>
+            );
+        }
+        return item;
+    };
+
     return (
         <div className="ticker-wrap">
             <div
@@ -57,30 +75,66 @@ const InteractiveTicker = ({ items }) => {
                 onMouseLeave={handleMouseLeave}
             >
                 {items.map((item, i) => (
-                    <div
-                        key={i}
-                        ref={el => itemRefs.current[i] = el}
-                        className={`ticker-item ${hoveredIndex === i ? 'ticker-item-highlighted' : ''}`}
-                    >
-                        {item}
-                    </div>
+                    <React.Fragment key={i}>
+                        <div
+                            ref={el => itemRefs.current[i] = el}
+                            className={`ticker-item ${hoveredIndex === i ? 'ticker-item-highlighted' : ''}`}
+                        >
+                            {renderItem(item)}
+                        </div>
+                        {i < items.length - 1 && (
+                            <span className="ticker-item" style={{
+                                color: 'var(--secondary)',
+                                opacity: 0.7,
+                                fontWeight: 'bold',
+                                fontSize: '1.2em',
+                                letterSpacing: '0.05em'
+                            }}>
+                                ◀ ▶
+                            </span>
+                        )}
+                    </React.Fragment>
                 ))}
                 {items.map((item, i) => (
-                    <div
-                        key={`dup-${i}`}
-                        ref={el => itemRefs.current[i + items.length] = el}
-                        className={`ticker-item ${hoveredIndex === (i + items.length) ? 'ticker-item-highlighted' : ''}`}
-                    >
-                        {item}
-                    </div>
+                    <React.Fragment key={`dup-${i}`}>
+                        <div
+                            ref={el => itemRefs.current[i + items.length] = el}
+                            className={`ticker-item ${hoveredIndex === (i + items.length) ? 'ticker-item-highlighted' : ''}`}
+                        >
+                            {renderItem(item)}
+                        </div>
+                        {i < items.length - 1 && (
+                            <span className="ticker-item" style={{
+                                color: 'var(--secondary)',
+                                opacity: 0.7,
+                                fontWeight: 'bold',
+                                fontSize: '1.2em',
+                                letterSpacing: '0.05em'
+                            }}>
+                                ◀ ▶
+                            </span>
+                        )}
+                    </React.Fragment>
                 ))}
                 {items.map((item, i) => (
-                    <div
-                        key={`dup2-${i}`}
-                        className={`ticker-item ${hoveredIndex === (i + items.length * 2) ? 'ticker-item-highlighted' : ''}`}
-                    >
-                        {item}
-                    </div>
+                    <React.Fragment key={`dup2-${i}`}>
+                        <div
+                            className={`ticker-item ${hoveredIndex === (i + items.length * 2) ? 'ticker-item-highlighted' : ''}`}
+                        >
+                            {renderItem(item)}
+                        </div>
+                        {i < items.length - 1 && (
+                            <span className="ticker-item" style={{
+                                color: 'var(--secondary)',
+                                opacity: 0.7,
+                                fontWeight: 'bold',
+                                fontSize: '1.2em',
+                                letterSpacing: '0.05em'
+                            }}>
+                                ◀ ▶
+                            </span>
+                        )}
+                    </React.Fragment>
                 ))}
             </div>
         </div>
