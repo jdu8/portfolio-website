@@ -1,0 +1,8 @@
+{
+  "name": "portfolio-website",
+  "version": "1.0.0",
+  "description": "Personal portfolio website",
+  "dependencies": {
+    "resend": "^3.2.0"
+  }
+}

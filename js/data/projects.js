@@ -2,10 +2,24 @@
 const projects = [
     {
         title: "Sustainable Shopper",
-        description: "A virtual try-on system using diffusion models to generate photorealistic images of users wearing selected clothing items. Includes a FAISS & CLIP powered similarity search for sustainable alternatives.",
+        description: `A virtual try-on system using diffusion models to generate photorealistic images of users wearing selected clothing items.
+
+Key Achievements:
+• Achieved [95%] accuracy in clothing segmentation
+• Generated [10K+] realistic try-on images
+• [50ms] average processing time per image
+• Served [5K+] active users
+
+Built a FAISS & CLIP powered similarity search for sustainable alternatives with [98%] relevance score.`,
         tags: ["Diffusion Models", "PyTorch", "React", "Flask", "MongoDB", "FAISS"],
         jobTypes: ["Generative AI", "ML Engineering", "Full Stack"],
-        insight: "Practical application of generative AI for e-commerce."
+        insight: "Practical application of generative AI for e-commerce.",
+        technologies: ["PyTorch", "React", "Flask", "MongoDB", "FAISS", "CLIP"],
+        links: [
+            { type: "github", url: "https://github.com", text: "View Code", icon: "🔗" },
+            { type: "demo", url: "https://demo.com", text: "Live Demo", icon: "⚡" },
+            { type: "article", url: "https://medium.com", text: "Read Article", icon: "✍️" }
+        ]
     },
     {
         title: "RAG Based Chatbot",

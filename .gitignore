@@ -1,2 +1,8 @@
 .DS_Store
 .claude/
+.env.local
+.env
+node_modules/
+.vercel
+EMAIL_SETUP_GUIDE.md
+IMPLEMENTATION_PLAN.md

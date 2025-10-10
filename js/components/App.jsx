@@ -11,6 +11,7 @@ function App() {
     const [currentNavIndex, setCurrentNavIndex] = React.useState(0);
     const [expandedJobs, setExpandedJobs] = React.useState({});
     const [loadingJobs, setLoadingJobs] = React.useState({});
+    const [selectedProject, setSelectedProject] = React.useState(null);
 
     const navSections = ['Experience', 'Education', 'Skills', 'Projects', 'Contact'];
 
@@ -316,33 +317,12 @@ function App() {
                            {Object.entries(skills).map(([category, data]) => {
                                 const categoryFullyActivated = data.skills.every(skill => skillState[skill]?.activated);
 
-                                // DEBUG LOGGING
-                                if (categoryFullyActivated) {
-                                    console.log(`🔥 Category "${category}" is FULLY ACTIVATED!`);
-                                    console.log(`Skills in ${category}:`, data.skills);
-                                    data.skills.forEach(skill => {
-                                        console.log(`  - ${skill}: points=${skillState[skill]?.points}, activated=${skillState[skill]?.activated}`);
-                                    });
-                                }
-
                                 return data.skills.map(skill => {
                                     const skillPoints = skillState[skill]?.points || 0;
                                     const skillActivated = skillState[skill]?.activated || false;
 
-                                    // DEBUG: Log each skill's state
-                                    if (skillActivated) {
-                                        console.log(`✅ Skill "${skill}" is activated (points: ${skillPoints}, category: ${category}, categoryFullyActivated: ${categoryFullyActivated})`);
-                                    }
-
-                                    // DEBUG: Log CSS classes being applied
                                     const boxClasses = categoryFullyActivated ? 'group-activated' : (skillPoints >= 1 ? 'skill-glow' : 'border-transparent');
                                     const iconClasses = categoryFullyActivated ? 'group-activated-icon' : '';
-
-                                    if (skillActivated) {
-                                        console.log(`🎨 CSS for "${skill}": box="${boxClasses}", icon="${iconClasses}"`);
-                                        console.log(`   Border color: ${skillPoints >= 1 ? data.color : 'transparent'}`);
-                                        console.log(`   Filter: ${skillPoints >= 1 ? `brightness(${0.7 + (skillPoints / 5) * 0.6}) drop-shadow(0 0 ${skillPoints * 3}px ${data.color}) saturate(${1 + skillPoints / 10})` : 'brightness(1.2) saturate(0.5) contrast(1.1)'}`);
-                                    }
 
                                     return (
                                     <div
@@ -409,31 +389,23 @@ function App() {
                                     )}
                                 </div>
                             ) : (
-                                <>
-                                    <SkillsBreaker
-                                        skills={skills}
-                                        skillState={skillState}
-                                        onPointUpdate={handlePointUpdate}
-                                        onGameEnd={handleGameEnd}
-                                        onActivateAll={handleActivateAll}
-                                        hasWonGame={hasWonGame}
-                                    />
-                                    {hasWonGame && (
-                                        <div className="mt-4 text-center">
-                                            <button onClick={async () => {
-                                                setIsResetting(true);
-                                                setGameActive(false);
-                                                await new Promise(resolve => setTimeout(resolve, 500));
-                                                setSkillState(initialSkillState);
-                                                setHasWonGame(false);
-                                                setHasPlayedGame(false);
-                                                setIsResetting(false);
-                                            }} className="font-mono text-sm px-4 py-2 rounded border border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-400 transition-all">
-                                                /reset_all_progress
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
+                                <SkillsBreaker
+                                    skills={skills}
+                                    skillState={skillState}
+                                    onPointUpdate={handlePointUpdate}
+                                    onGameEnd={handleGameEnd}
+                                    onActivateAll={handleActivateAll}
+                                    hasWonGame={hasWonGame}
+                                    onResetProgress={async () => {
+                                        setIsResetting(true);
+                                        setGameActive(false);
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        setSkillState(initialSkillState);
+                                        setHasWonGame(false);
+                                        setHasPlayedGame(false);
+                                        setIsResetting(false);
+                                    }}
+                                />
                             )}
                         </div>
                     </section>
@@ -452,10 +424,10 @@ function App() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredProjects.map((project, index) => (
-                                <div key={project.title} className="bg-[var(--bg-medium)] rounded-lg p-6 flex flex-col justify-between border border-white/10 transition-all duration-300 hover:border-[var(--primary)] hover:scale-105">
+                                <div key={project.title} className="bg-[var(--bg-medium)] rounded-lg p-6 flex flex-col justify-between border border-white/10 transition-all duration-300 hover:border-[var(--primary)] hover:scale-105 cursor-pointer" onClick={() => setSelectedProject(project)}>
                                     <div>
                                         <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>
-                                        <p className="text-gray-400 mb-4">{project.description}</p>
+                                        <p className="text-gray-400 mb-4 line-clamp-3">{typeof project.description === 'string' ? project.description : project.description.split('\n')[0]}</p>
                                         <p className="font-mono text-[var(--accent)] text-sm mb-4">
                                             {project.insight && `[+] ${project.insight}`}
                                         </p>
@@ -464,20 +436,21 @@ function App() {
                                         <ul className="flex flex-wrap gap-2 mb-4">
                                             {project.tags.map(tag => <li key={tag} className="bg-gray-700 text-sm px-2 py-1 rounded">{tag}</li>)}
                                         </ul>
-                                        <div className="flex space-x-4">
-                                             <a href={userData.github} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[var(--primary)]">GitHub</a>
+                                        <div className="flex items-center justify-between">
+                                             <a href={userData.github} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[var(--primary)]" onClick={(e) => e.stopPropagation()}>GitHub</a>
+                                             <span className="text-xs text-gray-500 font-mono">Click for details →</span>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </section>
-                    <section id="contact" className="section-contact py-24 text-center">
-                        <h2 className={`text-3xl font-bold text-white mb-4 glitch-hover ${activeSection === 'contact' ? 'section-glow' : ''}`}>Get In Touch</h2>
-                        <p className="text-lg text-gray-400 max-w-xl mx-auto mb-8">
-                            I'm actively seeking new opportunities and collaborations. My inbox is always open, whether you have a question or just want to connect.
+                    <section id="contact" className="section-contact py-24">
+                        <h2 className={`text-3xl font-bold text-white mb-4 text-center glitch-hover ${activeSection === 'contact' ? 'section-glow' : ''}`}>Get In Touch</h2>
+                        <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-12 text-center">
+                            I'm actively seeking new opportunities and collaborations. Choose how you'd like to connect.
                         </p>
-                        <a href={`mailto:${userData.email}`} className="inline-block bg-[var(--secondary)] text-white font-bold px-8 py-4 rounded-md button-glow">Say Hello</a>
+                        <ContactOptions />
                     </section>
                 </div>
             </main>
@@ -488,6 +461,14 @@ function App() {
                 </div>
                 <p>Designed & Built by {userData.name}</p>
             </footer>
+
+            {/* Project Terminal Popup */}
+            {selectedProject && (
+                <ProjectTerminal
+                    project={selectedProject}
+                    onClose={() => setSelectedProject(null)}
+                />
+            )}
         </div>
     );
 }
