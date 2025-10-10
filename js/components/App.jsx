@@ -469,6 +469,9 @@ function App() {
                     onClose={() => setSelectedProject(null)}
                 />
             )}
+
+            {/* AI Chatbot */}
+            <Chatbot />
         </div>
     );
 }
