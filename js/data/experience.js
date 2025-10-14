@@ -7,17 +7,17 @@ const experience = [
         headline: "Building data infrastructure and dashboards for the Office of the Provost, working with Tableau, ETL pipelines, and LLMs for data processing and analysis.",
         details: []
     },
-    {
-        role: "Private Tutor",
-        company: "Self-Employed",
-        date: "Jan 2024 - July 2024",
-        headline: "Taught STEM and coding to 65+ middle and high school students through personalized tutoring and summer bootcamps.",
-        details: [
-            "Helped 15+ middle schoolers improve their STEM grades by an average of 20% through one-on-one tutoring sessions tailored to each student's learning style.",
-            "Ran summer coding bootcamps for 50+ high school students, teaching them programming fundamentals through hands-on projects they could actually use.",
-            "Created custom learning modules that made abstract concepts click for students, boosting their engagement and genuine interest in the subject matter by 40%."
-        ]
-    },
+    // {
+    //     role: "Private Tutor",
+    //     company: "Self-Employed",
+    //     date: "Jan 2024 - July 2024",
+    //     headline: "Taught STEM and coding to 65+ middle and high school students through personalized tutoring and summer bootcamps.",
+    //     details: [
+    //         "Helped 15+ middle schoolers improve their STEM grades by an average of 20% through one-on-one tutoring sessions tailored to each student's learning style.",
+    //         "Ran summer coding bootcamps for 50+ high school students, teaching them programming fundamentals through hands-on projects they could actually use.",
+    //         "Created custom learning modules that made abstract concepts click for students, boosting their engagement and genuine interest in the subject matter by 40%."
+    //     ]
+    // },
     {
         role: "Intern",
         company: "Samsung",
