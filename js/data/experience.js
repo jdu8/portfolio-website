@@ -5,7 +5,11 @@ const experience = [
         company: "New York University",
         date: "Sep 2025 - Present",
         headline: "Building data infrastructure and dashboards for the Office of the Provost, working with Tableau, ETL pipelines, and LLMs for data processing and analysis.",
-        details: []
+        details: [
+            "Engineered and maintain an automated Tableau dashboard tracking PhD alumni career outcomes, providing key data-driven insights to university leadership for strategic planning.",
+            "Developed an ETL pipeline to scrape and process public data, leveraging LLMs for advanced data cleaning and entity extraction, eliminating reliance on third-party vendors.",
+            "Synthesized complex data analyses into actionable reports and presented findings to senior stakeholders, bridging the gap between technical teams and non-technical leadership."
+        ]
     },
     // {
     //     role: "Private Tutor",
