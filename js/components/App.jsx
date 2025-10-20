@@ -168,7 +168,7 @@ function App() {
                                         </span>
                                     </a>
                                     <a
-                                        href="https://drive.google.com/file/d/1GK7wQ9Vd4anf2bOLFZLN5bSQtasSSnc6/view?usp=sharing"
+                                        href="https://drive.google.com/file/d/12GXsObVRN8eta4NjsIANxKOJ5lXa0AeT/view?usp=drivesdk"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-block border-2 border-[var(--primary)] text-[var(--primary)] font-bold px-6 py-3 rounded-md hover:bg-[var(--primary)]/10 transition-all duration-300"

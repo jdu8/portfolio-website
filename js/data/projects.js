@@ -104,4 +104,3 @@ Implements 3-lead ECG configuration with automatic heart rate calculation and ca
         insight: "Streamlined analysis workflow for reporting accuracy."
     }
 ];
-

@@ -82,17 +82,15 @@ const InteractiveTicker = ({ items }) => {
                         >
                             {renderItem(item)}
                         </div>
-                        {i < items.length - 1 && (
-                            <span className="ticker-item" style={{
-                                color: 'var(--secondary)',
-                                opacity: 0.7,
-                                fontWeight: 'bold',
-                                fontSize: '1.2em',
-                                letterSpacing: '0.05em'
-                            }}>
-                                ◀ ▶
-                            </span>
-                        )}
+                        <span className="ticker-item" style={{
+                            color: 'var(--secondary)',
+                            opacity: 0.7,
+                            fontWeight: 'bold',
+                            fontSize: '1.2em',
+                            letterSpacing: '0.05em'
+                        }}>
+                            ◀ ▶
+                        </span>
                     </React.Fragment>
                 ))}
                 {items.map((item, i) => (
@@ -103,17 +101,15 @@ const InteractiveTicker = ({ items }) => {
                         >
                             {renderItem(item)}
                         </div>
-                        {i < items.length - 1 && (
-                            <span className="ticker-item" style={{
-                                color: 'var(--secondary)',
-                                opacity: 0.7,
-                                fontWeight: 'bold',
-                                fontSize: '1.2em',
-                                letterSpacing: '0.05em'
-                            }}>
-                                ◀ ▶
-                            </span>
-                        )}
+                        <span className="ticker-item" style={{
+                            color: 'var(--secondary)',
+                            opacity: 0.7,
+                            fontWeight: 'bold',
+                            fontSize: '1.2em',
+                            letterSpacing: '0.05em'
+                        }}>
+                            ◀ ▶
+                        </span>
                     </React.Fragment>
                 ))}
                 {items.map((item, i) => (
@@ -123,17 +119,15 @@ const InteractiveTicker = ({ items }) => {
                         >
                             {renderItem(item)}
                         </div>
-                        {i < items.length - 1 && (
-                            <span className="ticker-item" style={{
-                                color: 'var(--secondary)',
-                                opacity: 0.7,
-                                fontWeight: 'bold',
-                                fontSize: '1.2em',
-                                letterSpacing: '0.05em'
-                            }}>
-                                ◀ ▶
-                            </span>
-                        )}
+                        <span className="ticker-item" style={{
+                            color: 'var(--secondary)',
+                            opacity: 0.7,
+                            fontWeight: 'bold',
+                            fontSize: '1.2em',
+                            letterSpacing: '0.05em'
+                        }}>
+                            ◀ ▶
+                        </span>
                     </React.Fragment>
                 ))}
             </div>
