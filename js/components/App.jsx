@@ -436,8 +436,7 @@ function App() {
                                         <ul className="flex flex-wrap gap-2 mb-4">
                                             {project.tags.map(tag => <li key={tag} className="bg-gray-700 text-sm px-2 py-1 rounded">{tag}</li>)}
                                         </ul>
-                                        <div className="flex items-center justify-between">
-                                             <a href={userData.github} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[var(--primary)]" onClick={(e) => e.stopPropagation()}>GitHub</a>
+                                        <div className="flex items-center justify-end">
                                              <span className="text-xs text-gray-500 font-mono">Click for details →</span>
                                         </div>
                                     </div>
