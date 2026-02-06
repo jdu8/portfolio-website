@@ -1,29 +1,20 @@
 // Experience data
 const experience = [
     {
-        role: "Research Analyst",
+        role: "Data Analyst",
         company: "New York University",
         date: "Sep 2025 - Present",
-        headline: "Building data infrastructure and dashboards for the Office of the Provost, working with Tableau, ETL pipelines, and LLMs for data processing and analysis.",
+        headline: "Conducting institutional research on PhD alumni outcomes, maintaining Tableau dashboards, and developing Python automation scripts for data reconciliation and analysis.",
         details: [
-            "Engineered and maintain an automated Tableau dashboard tracking PhD alumni career outcomes, providing key data-driven insights to university leadership for strategic planning.",
-            "Developed an ETL pipeline to scrape and process public data, leveraging LLMs for advanced data cleaning and entity extraction, eliminating reliance on third-party vendors.",
-            "Synthesized complex data analyses into actionable reports and presented findings to senior stakeholders, bridging the gap between technical teams and non-technical leadership."
+            "Executed data analytics projects supporting institutional research across doctoral programs and alumni outcomes, developing statistical analyses and visualizations that informed strategic decision-making",
+            "Built automated data solutions using Python, including fuzzy matching algorithms for cross-source reconciliation that reduced manual processing time by 60%",
+            "Conducted feasibility studies on automated data collection systems, evaluating technical approaches and third-party solutions with cost-benefit analyses",
+            "Maintained Tableau dashboards through systematic quality audits, identifying data discrepancies and implementing stakeholder-requested improvements",
+            "Tested LLM automation for large-scale data classification, documenting performance constraints and scalability recommendations",
         ]
     },
-    // {
-    //     role: "Private Tutor",
-    //     company: "Self-Employed",
-    //     date: "Jan 2024 - July 2024",
-    //     headline: "Taught STEM and coding to 65+ middle and high school students through personalized tutoring and summer bootcamps.",
-    //     details: [
-    //         "Helped 15+ middle schoolers improve their STEM grades by an average of 20% through one-on-one tutoring sessions tailored to each student's learning style.",
-    //         "Ran summer coding bootcamps for 50+ high school students, teaching them programming fundamentals through hands-on projects they could actually use.",
-    //         "Created custom learning modules that made abstract concepts click for students, boosting their engagement and genuine interest in the subject matter by 40%."
-    //     ]
-    // },
     {
-        role: "Intern",
+        role: "Research Intern",
         company: "Samsung",
         date: "Dec 2022 - Aug 2023",
         headline: "Engineered a real-time multilingual text recognition system from scratch using state-of-the-art deep learning, achieving 89% accuracy while optimizing for deployment on resource-constrained mobile devices.",
