@@ -4,13 +4,12 @@ const experience = [
         role: "Data Analyst",
         company: "New York University",
         date: "Sep 2025 - Present",
-        headline: "Conducting institutional research on PhD alumni outcomes, maintaining Tableau dashboards, and developing Python automation scripts for data reconciliation and analysis.",
+        headline: "Conducting institutional research on PhD alumni outcomes, optimizing Tableau dashboards, and developing Python automation scripts for data reconciliation and analysis.",
         details: [
-            "Executed data analytics projects supporting institutional research across doctoral programs and alumni outcomes, developing statistical analyses and visualizations that informed strategic decision-making",
-            "Built automated data solutions using Python, including fuzzy matching algorithms for cross-source reconciliation that reduced manual processing time by 60%",
-            "Conducted feasibility studies on automated data collection systems, evaluating technical approaches and third-party solutions with cost-benefit analyses",
-            "Maintained Tableau dashboards through systematic quality audits, identifying data discrepancies and implementing stakeholder-requested improvements",
-            "Tested LLM automation for large-scale data classification, documenting performance constraints and scalability recommendations",
+            "Conducted comparative statistical analyses of PhD alumni employment outcomes, identifying sector distribution patterns and trends to inform university program strategies",
+            "Developed Python automation scripts to reconcile cross-source institutional datasets, reducing manual data processing time by 60%",
+            "Optimized Tableau dashboard performance by converting calculated fields to pre-computed data source columns and removing redundant fields, reducing load time by 30%",
+            "Conducted feasibility studies on automated web scraping and LLM-based data classification, evaluating technical approaches and delivering scalability recommendations",
         ]
     },
     {
@@ -38,4 +37,3 @@ const experience = [
         ]
     }
 ];
-
